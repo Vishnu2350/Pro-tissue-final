@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Tissue – Expert Tissue Paper Consultancy</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/TextPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+<style>
+  :root {
+    --navy: #0a0f1e;
+    --deep: #0d1528;
+    --blue: #1a6ee0;
+    --blue-bright: #2d87ff;
+    --steel: #8fa3bf;
+    --white: #f0f4ff;
+    --accent: #00c6ff;
+    --border: rgba(45,135,255,0.18);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-padding-top: 80px; }
+
+  /* scroll-behavior: smooth; — removed: conflicts with GSAP ScrollToPlugin */
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+  /* ─── NAV ─── */
+  #navbar {
+    position: fixed; top:0; left:0; right:0; z-index:999;
+    padding: 0 5%;
+    height: 72px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+  }
+  #navbar.scrolled {
+    background: rgba(10,15,30,0.92);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 2px 32px rgba(0,0,0,0.5);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo img { height: 44px; }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--steel);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content:''; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+    background: var(--blue-bright); transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cta {
+    background: var(--blue);
+    color: #fff !important;
+    padding: 0.5rem 1.4rem;
+    border-radius: 4px;
+    transition: background 0.3s !important;
+  }
+  .nav-cta:hover { background: var(--blue-bright) !important; }
+  .nav-cta::after { display:none !important; }
+
+  /* ─── HAMBURGER ─── */
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; z-index:1001; }
+  .hamburger span { display:block; width:26px; height:2px; background:var(--white); transition: 0.3s; border-radius:2px; }
+  .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+  .hamburger.active span:nth-child(2) { opacity:0; }
+  .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+  /* Mobile nav */
+  .mobile-nav {
+    display:none;
+    position:fixed; top:72px; left:0; right:0; z-index:998;
+    background: rgba(10,15,30,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    transform: translateY(-8px);
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+  }
+  .mobile-nav.open {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .mobile-nav a {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--steel);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1rem 5%;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .mobile-nav a:last-child { border-bottom: none; }
+  .mobile-nav a:hover { color: var(--white); background: rgba(45,135,255,0.08); }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; overflow: hidden;
+    padding: 120px 5% 80px;
+    gap: 3rem;
+  }
+  @media (max-width: 768px) {
+    #hero { min-height: unset !important; }
+  }
+
+  .hero-bg {
+    position:absolute; inset:0; z-index:0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(26,110,224,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 50% at 20% 80%, rgba(0,198,255,0.08) 0%, transparent 60%),
+                var(--navy);
+  }
+
+  /* Animated grid */
+  .hero-grid {
+    position:absolute; inset:0; z-index:0;
+    background-image:
+      linear-gradient(rgba(45,135,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45,135,255,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+    mask-image: radial-gradient(ellipse at 60% 40%, black 30%, transparent 70%);
+  }
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 60px 60px; }
+  }
+
+  /* Floating orbs */
+  .orb {
+    position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0;
+    animation: orbFloat 8s ease-in-out infinite alternate;
+  }
+  .orb-1 { width:400px; height:400px; background:rgba(26,110,224,0.2); top:-10%; right:10%; animation-delay:0s; }
+  .orb-2 { width:250px; height:250px; background:rgba(0,198,255,0.12); bottom:10%; left:5%; animation-delay:-4s; }
+  @keyframes orbFloat {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-40px) scale(1.05); }
+  }
+
+  .hero-content { position:relative; z-index:2; max-width:700px; }
+
+  .hero-video {
+    flex: 1;
+    min-width: 500px;
+    max-width: 700px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    min-height: 500px;
+    background: rgba(13,21,40,0.8);
+    box-shadow: 0 0 60px rgba(26,110,224,0.15), inset 0 0 60px rgba(26,110,224,0.05);
+  }
+  .hero-video img
+  {
+    width: 120%;
+    height: 120%;
+    display: block;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  /* Animated visual shown when video is loading/missing */
+  .hero-visual-card {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2.5rem;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(26,110,224,0.25) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(0,198,255,0.12) 0%, transparent 50%),
+      var(--deep);
+  }
+  .hero-visual-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(45,135,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45,135,255,0.07) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 15s linear infinite;
+  }
+  .hero-vc-badge {
+    position: relative; z-index: 1;
+    background: rgba(45,135,255,0.12);
+    border: 1px solid rgba(45,135,255,0.3);
+    border-radius: 50%;
+    width: 90px; height: 90px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.6rem;
+    animation: badgePulse 3s ease-in-out infinite;
+  }
+  @keyframes badgePulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(45,135,255,0.3); transform: scale(1); }
+    50% { box-shadow: 0 0 0 18px rgba(45,135,255,0); transform: scale(1.04); }
+  }
+  .hero-vc-title {
+    position: relative; z-index: 1;
+    font-family: "Syne", sans-serif; font-weight: 800;
+    font-size: 1.05rem; color: var(--white); text-align: center; letter-spacing: 0.04em;
+  }
+  .hero-vc-stats {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; width: 100%;
+  }
+  .hero-vc-stat {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .hero-vc-stat:hover { background: rgba(45,135,255,0.1); border-color: var(--blue-bright); }
+  .hero-vc-stat .num { font-family: "Bebas Neue", sans-serif; font-size: 1.8rem; color: var(--blue-bright); line-height: 1; }
+  .hero-vc-stat .lbl { font-size: 0.68rem; color: var(--steel); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem; }
+  .hero-vc-tags {
+    position: relative; z-index: 1;
+    display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+  }
+  .hero-vc-tag {
+    font-size: 0.72rem; font-family: "Syne", sans-serif; font-weight: 600;
+    color: var(--accent); border: 1px solid rgba(0,198,255,0.25);
+    background: rgba(0,198,255,0.06);
+    padding: 0.25rem 0.75rem; border-radius: 100px;
+    letter-spacing: 0.06em;
+  }
+  .hero-vc-bar {
+    position: relative; z-index: 1;
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.9rem 1.1rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .hero-vc-bar .dot-live { width: 8px; height: 8px; background: #00e676; border-radius: 50%; animation: pulse 2s infinite; flex-shrink:0; }
+  .hero-vc-bar span { font-size: 0.78rem; color: var(--steel); font-family: "Syne", sans-serif; }
+
+  .hero-eyebrow {
+    display:inline-flex; align-items:center; gap:0.6rem;
+    border: 1px solid var(--border);
+    background: rgba(45,135,255,0.08);
+    padding: 0.4rem 1rem; border-radius:100px;
+    font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:600;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--accent);
+    margin-bottom: 1.8rem;
+  }
+  .hero-eyebrow .dot { width:6px; height:6px; background:var(--accent); border-radius:50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+
+  .hero-title {
+    font-family:'Bebas Neue',sans-serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 1.8rem;
+  }
+  .hero-title .accent { color: var(--blue-bright); }
+  .hero-title .outline {
+    -webkit-text-stroke: 2px var(--blue-bright);
+    color: transparent;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem; line-height:1.7; color:var(--steel);
+    max-width:540px; margin-bottom:2.5rem; font-weight:300;
+  }
+
+  .hero-btns { display:flex; gap:1rem; flex-wrap:wrap; }
+
+  .btn-primary {
+    display:inline-flex; align-items:center; gap:0.6rem;
+    background: var(--blue); color:#fff;
+    padding: 0.9rem 2rem; border-radius:6px;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem;
+    letter-spacing:0.04em; text-decoration:none;
+    transition: all 0.3s; border: none; cursor:pointer;
+    box-shadow: 0 0 30px rgba(26,110,224,0.4);
+  }
+  .btn-primary:hover { background:var(--blue-bright); transform:translateY(-2px); box-shadow:0 8px 40px rgba(45,135,255,0.5); }
+
+  .btn-outline {
+    display:inline-flex; align-items:center; gap:0.6rem;
+    border: 1px solid var(--border); color:var(--white);
+    padding: 0.9rem 2rem; border-radius:6px;
+    font-family:'Syne',sans-serif; font-weight:600; font-size:0.92rem;
+    letter-spacing:0.04em; text-decoration:none;
+    transition: all 0.3s; background:rgba(45,135,255,0.05);
+  }
+  .btn-outline:hover { background:rgba(45,135,255,0.15); border-color:var(--blue-bright); transform:translateY(-2px); }
+
+  /* hero stats */
+  .hero-stats {
+    position:absolute; right:5%; top:20px; transform:none;
+    display:flex; flex-direction:column; gap:1.5rem; z-index:2;
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    border-radius:12px; padding:1.2rem 1.5rem; text-align:center;
+    min-width:140px;
+    transition: all 0.3s;
+  }
+  .stat-card:hover { background:rgba(45,135,255,0.1); border-color:var(--blue-bright); transform:translateX(-4px); }
+  .stat-number { font-family:'Bebas Neue',sans-serif; font-size:2.4rem; color:var(--blue-bright); line-height:1; }
+  .stat-label { font-size:0.72rem; color:var(--steel); text-transform:uppercase; letter-spacing:0.1em; margin-top:0.3rem; font-weight:500; }
+
+  /* scroll indicator */
+  .scroll-hint {
+    position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); z-index:2;
+    display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+    font-size:0.7rem; color:var(--steel); letter-spacing:0.1em; text-transform:uppercase;
+  }
+  .scroll-line { width:1px; height:40px; background:linear-gradient(var(--blue-bright),transparent); animation:scrollPulse 2s infinite; }
+  @keyframes scrollPulse { 0%,100%{opacity:0;height:0} 50%{opacity:1;height:40px} }
+
+  /* ─── SECTION BASE ─── */
+  section { padding: 5rem 5% 7rem; scroll-margin-top: 72px; }
+  .section-label {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700;
+    color:var(--blue-bright); letter-spacing:0.15em; text-transform:uppercase;
+    margin-bottom:1rem;
+  }
+  .section-label::before { content:''; width:20px; height:2px; background:var(--blue-bright); }
+  .section-title {
+    font-family:'Bebas Neue',sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height:1; letter-spacing:0.02em;
+    margin-bottom:1.2rem;
+  }
+  .section-sub { font-size:1rem; color:var(--steel); line-height:1.7; max-width:540px; }
+
+  /* ─── ABOUT ─── */
+  #about { background: var(--deep); position:relative; overflow:hidden; }
+  #about::before {
+    content:''; position:absolute; right:-200px; top:-200px;
+    width:600px; height:600px; border-radius:50%;
+    background:radial-gradient(circle, rgba(26,110,224,0.1) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+  .about-visual {
+    position:relative;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius:20px; padding:3rem; overflow:hidden;
+  }
+  .about-visual::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(26,110,224,0.1) 0%, transparent 60%);
+  }
+  .about-icon-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; position:relative; z-index:1; }
+  .about-icon-card {
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:12px; padding:1.5rem; text-align:center;
+    transition:all 0.3s;
+  }
+  .about-icon-card:hover { background:rgba(45,135,255,0.12); border-color:var(--blue-bright); transform:translateY(-4px); }
+  .about-icon-card .icon { font-size:2rem; margin-bottom:0.5rem; }
+  .about-icon-card p { font-size:0.75rem; color:var(--steel); font-weight:500; line-height:1.4; }
+
+  .about-text .tags { display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:1.5rem; }
+  .tag {
+    border: 1px solid var(--border); background:rgba(45,135,255,0.06);
+    padding:0.35rem 0.9rem; border-radius:100px;
+    font-size:0.78rem; color:var(--steel); font-weight:500;
+  }
+
+  /* vision/mission */
+  .vm-cards { display:grid; gap:1rem; margin-top:2rem; }
+  .vm-card {
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-left: 3px solid var(--blue); border-radius:8px; padding:1.2rem 1.5rem;
+  }
+  .vm-card h4 { font-family:'Syne',sans-serif; font-size:0.82rem; font-weight:700; color:var(--blue-bright); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.5rem; }
+  .vm-card p { font-size:0.9rem; color:var(--steel); line-height:1.6; }
+
+  /* ─── SERVICES ─── */
+  #services { background:var(--navy); }
+  .services-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem; margin-top:4rem; }
+
+  .service-card {
+    background: rgba(255,255,255,0.03);
+    border:1px solid var(--border); border-radius:16px; padding:2rem;
+    position:relative; overflow:hidden;
+    transition: all 0.4s;
+    cursor:pointer;
+  }
+  .service-card::before {
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(26,110,224,0.15) 0%, transparent 60%);
+    opacity:0; transition:opacity 0.4s;
+  }
+  .service-card:hover { border-color:var(--blue-bright); transform:translateY(-6px); box-shadow:0 20px 60px rgba(26,110,224,0.2); }
+  .service-card:hover::before { opacity:1; }
+
+  .service-number { font-family:'Bebas Neue',sans-serif; font-size:3.5rem; color:rgba(45,135,255,0.12); line-height:1; margin-bottom:0.5rem; }
+  .service-icon { font-size:2.2rem; margin-bottom:1rem; }
+  .service-card h3 { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; margin-bottom:0.8rem; }
+  .service-card p { font-size:0.88rem; color:var(--steel); line-height:1.7; }
+  .service-tags { display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:1.2rem; }
+  .service-tag { font-size:0.72rem; color:var(--blue-bright); border:1px solid rgba(45,135,255,0.3); padding:0.2rem 0.6rem; border-radius:4px; }
+
+  /* ─── WHY US ─── */
+  #why { background:var(--deep); }
+  .why-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+  .why-list { display:grid; gap:1rem; }
+  .why-item {
+    display:flex; gap:1rem; align-items:flex-start;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:10px; padding:1.2rem;
+    transition:all 0.3s;
+  }
+  .why-item:hover { background:rgba(45,135,255,0.08); border-color:var(--blue-bright); }
+  .why-check { width:28px; height:28px; background:rgba(45,135,255,0.15); border:1px solid var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.8rem; color:var(--blue-bright); }
+  .why-item-text h4 { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; margin-bottom:0.3rem; }
+  .why-item-text p { font-size:0.85rem; color:var(--steel); line-height:1.6; }
+
+  /* industries */
+  .industries-list { display:flex; flex-direction:column; gap:0.8rem; }
+  .industry-item {
+    display:flex; align-items:center; gap:1rem;
+    padding:1rem 1.2rem; border:1px solid var(--border);
+    border-radius:8px; background:rgba(255,255,255,0.02);
+    font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:600;
+    transition:all 0.3s; cursor:default;
+  }
+  .industry-item:hover { background:rgba(45,135,255,0.1); border-color:var(--blue-bright); transform:translateX(6px); }
+  .industry-item span:first-child { font-size:1.4rem; }
+
+  /* ─── EXPERIENCE ─── */
+  #experience { background:var(--navy); }
+  .exp-grid { display:grid; grid-template-columns:1fr 2fr; gap:4rem; align-items:start; }
+  .exp-highlight {
+    background: rgba(26,110,224,0.1); border:1px solid var(--blue);
+    border-radius:16px; padding:2.5rem; text-align:center; position:sticky; top:100px;
+  }
+  .exp-highlight .big-num { font-family:'Bebas Neue',sans-serif; font-size:5rem; color:var(--blue-bright); line-height:1; }
+  .exp-highlight p { color:var(--steel); font-size:0.9rem; margin-top:0.5rem; }
+
+  .exp-items { display:grid; gap:1.2rem; }
+  .exp-item {
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:12px; padding:1.5rem;
+    display:flex; gap:1.2rem; align-items:flex-start;
+    transition:all 0.3s;
+  }
+  .exp-item:hover { background:rgba(45,135,255,0.08); border-color:var(--blue-bright); }
+  .exp-bullet { width:10px; height:10px; background:var(--blue-bright); border-radius:50%; margin-top:0.45rem; flex-shrink:0; box-shadow:0 0 10px var(--blue); }
+  .exp-item h4 { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; margin-bottom:0.4rem; }
+  .exp-item p { font-size:0.85rem; color:var(--steel); line-height:1.6; }
+
+  /* ─── CONTACT ─── */
+  #contact { background:var(--deep); }
+  .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:start; }
+  .contact-form { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:20px; padding:2.5rem; }
+  .form-group { margin-bottom:1.5rem; }
+  .form-group label {
+    display:block; font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700;
+    color:var(--steel); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.6rem;
+  }
+  .form-group input, .form-group textarea {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    color:var(--white); border-radius:8px; padding:0.85rem 1rem;
+    font-family:'DM Sans',sans-serif; font-size:0.95rem;
+    transition:border-color 0.3s, background 0.3s;
+    outline:none;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color:var(--blue-bright); background:rgba(45,135,255,0.06);
+  }
+  .form-group textarea { resize:vertical; min-height:130px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+  .contact-info { display:flex; flex-direction:column; gap:1.5rem; }
+  .info-card {
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:12px; padding:1.5rem;
+    display:flex; gap:1rem; align-items:flex-start;
+    transition:all 0.3s;
+  }
+  .info-card:hover { background:rgba(45,135,255,0.08); border-color:var(--blue-bright); }
+  .info-icon { font-size:1.5rem; }
+  .info-card h4 { font-family:'Syne',sans-serif; font-size:0.82rem; font-weight:700; color:var(--blue-bright); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.3rem; }
+  .info-card p { font-size:0.9rem; color:var(--steel); }
+
+  .confidential-note {
+    background:rgba(45,135,255,0.06); border:1px solid rgba(45,135,255,0.2);
+    border-radius:10px; padding:1rem 1.2rem;
+    font-size:0.82rem; color:var(--steel); line-height:1.6;
+    display:flex; gap:0.8rem; align-items:flex-start;
+  }
+  .confidential-note span:first-child { font-size:1.1rem; flex-shrink:0; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background:var(--navy); border-top:1px solid var(--border);
+    padding:3rem 5% 2rem;
+  }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:4rem; margin-bottom:3rem; }
+  .footer-brand img { height:40px; margin-bottom:1rem; }
+  .footer-brand p { font-size:0.88rem; color:var(--steel); line-height:1.7; max-width:300px; }
+  .footer-col h5 { font-family:'Syne',sans-serif; font-size:0.8rem; font-weight:700; color:var(--white); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1rem; }
+  .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:0.6rem; }
+  .footer-col ul a { font-size:0.88rem; color:var(--steel); text-decoration:none; transition:color 0.3s; }
+  .footer-col ul a:hover { color:var(--blue-bright); }
+  .footer-bottom { border-top:1px solid var(--border); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+  .footer-bottom p { font-size:0.82rem; color: rgba(143,163,191,0.5); }
+
+  /* ─── TICKER ─── */
+  .ticker-wrap { background:var(--blue); padding:0.6rem 0; overflow:hidden; }
+  .ticker { display:flex; white-space:nowrap; animation:ticker 30s linear infinite; }
+  .ticker-item { font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0 3rem; color:rgba(255,255,255,0.85); }
+  .ticker-item span { color:rgba(255,255,255,0.4); margin:0 1rem; }
+  @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width:1024px) {
+    .hero-stats { display:none; }
+    .about-grid, .why-grid, .contact-grid, .exp-grid { grid-template-columns:1fr; gap:3rem; }
+    .footer-grid { grid-template-columns:1fr 1fr; }
+    .exp-highlight { position:relative; top:0; }
+  }
+  @media (max-width:768px) {
+    .nav-links { display:none; }
+    .hamburger { display:flex; }
+    .footer-grid { grid-template-columns:1fr; gap:2rem; }
+    .form-row { grid-template-columns:1fr; }
+    section { padding:2.5rem 5% 4rem; scroll-margin-top: 72px; }
+    .hero-btns { flex-direction:column; }
+    .hero-btns .btn-primary, .hero-btns .btn-outline { width:100%; justify-content:center; }
+    #hero {
+      flex-direction: column;
+      padding: 72px 0 2rem;
+      gap: 0;
+      overflow: visible;
+      min-height: unset;
+    }
+    .hero-content { padding: 1.2rem 5% 1rem; width: 100%; order: 1; }
+    .hero-eyebrow { margin-bottom: 1rem; }
+    .hero-title { font-size: clamp(2.8rem, 11vw, 4.5rem); margin-bottom: 1rem; }
+    .hero-subtitle { font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .hero-video {
+      order: 2;
+      width: 100%;
+      max-width: 100%;
+      min-height: unset;
+      max-height: unset;
+      height: auto;
+      border-radius: 12px;
+      margin: 0 5% 2rem;
+      width: calc(100% - 10%);
+      border: 1px solid var(--border);
+      flex: none;
+      min-width: unset;
+      position: relative;
+    }
+    /* Make visual card auto-height — show everything */
+    .hero-visual-card {
+      position: relative;
+      inset: unset;
+      padding: 1.5rem;
+      gap: 1rem;
+      border-radius: 12px;
+    }
+    .hero-visual-card::before { border-radius: 12px; }
+    .hero-vc-badge { width: 64px; height: 64px; font-size: 2rem; }
+    .hero-vc-title { font-size: 0.95rem; }
+    .hero-vc-stats { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .hero-vc-stat { padding: 0.7rem; }
+    .hero-vc-stat .num { font-size: 1.4rem; }
+    .hero-vc-stat .lbl { font-size: 0.62rem; }
+    .hero-vc-tags { gap: 0.4rem; }
+    .hero-vc-tag { font-size: 0.68rem; }
+    .hero-vc-bar { padding: 0.7rem 0.9rem; }
+    .hero-vc-bar span:last-child { font-size: 0.7rem; }
+    /* Hide the absolute-positioned video on mobile since visual card is now relative */
+    .hero-video img { display: none; }
+    .hero-stats { display: none; }
+    .scroll-hint { display: none; }
+  }
+
+ /* ==============================
+   FULL SCREEN LOADER
+================================= */
+#loader{
+    position:fixed;
+    inset:0;
+    background:#0a0a0a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:20px;
+    z-index:9999;
+    padding:20px;
+    box-sizing:border-box;
+}
+
+/* ==============================
+   BRAND AREA
+================================= */
+.brand-area{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:nowrap;
+    perspective:900px;
+    max-width:100%;
+}
+
+.bl{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:800;
+    font-style:italic;
+    font-size:clamp(32px,8vw,64px);
+    line-height:1;
+    display:inline-block;
+    opacity:0;
+    transform:rotate3d(1,1,0.5,120deg) scale(0.3);
+}
+
+.bl.white{
+    color:#fff;
+}
+
+.bl.blue{
+    color:#2b8fe8;
+}
+
+/* ==============================
+   ROLL SVG
+================================= */
+.roll-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 4px;
+    opacity:0;
+    transform:scale(0.2) rotate(180deg);
+}
+
+.roll-wrap svg{
+    width:clamp(35px,8vw,68px);
+    height:auto;
+}
+
+/* ==============================
+   SVG ANIMATION
+================================= */
+.roll-outer{
+    animation:rollSpin 1.6s linear infinite;
+    transform-origin:34px 34px;
+}
+
+.roll-shine{
+    animation:shinePulse 1.6s ease-in-out infinite;
+}
+
+.paper-strip{
+    animation:paperUnroll 1.6s ease-in-out infinite;
+    transform-origin:34px 58px;
+}
+
+@keyframes rollSpin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+@keyframes shinePulse{
+    0%,100%{opacity:.25;}
+    50%{opacity:.55;}
+}
+
+@keyframes paperUnroll{
+    0%{transform:rotate(-8deg);}
+    50%{transform:rotate(8deg);}
+    100%{transform:rotate(-8deg);}
+}
+
+/* ==============================
+   TAGLINE
+================================= */
+.tagline-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    opacity:0;
+    flex-wrap:wrap;
+    text-align:center;
+}
+
+.tline{
+    width:clamp(20px,8vw,40px);
+    height:1.5px;
+    background:#2b8fe8;
+}
+
+.tagline{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:800;
+    font-size:clamp(10px,2vw,13px);
+    letter-spacing:3px;
+    color:#ccc;
+    text-transform:uppercase;
+}
+
+/* ==============================
+   PROGRESS BAR
+================================= */
+.bar-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:min(320px,90vw);
+}
+
+.bar-track{
+    flex:1;
+    height:3px;
+    background:#2a2a2a;
+    border-radius:2px;
+    position:relative;
+}
+
+.bar-fill{
+    width:0%;
+    height:100%;
+    background:#2b8fe8;
+    border-radius:2px;
+}
+
+.bar-head{
+    position:absolute;
+    top:-7px;
+    left:-16px;
+    width:16px;
+    height:16px;
+    background:#0a0a0a;
+    border:1.5px solid #2b8fe8;
+    border-radius:3px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.bar-head::after{
+    content:'';
+    width:5px;
+    height:6px;
+    background:#2b8fe8;
+    border-radius:1px;
+}
+
+.pct{
+    font-family:'Barlow Condensed',sans-serif;
+    font-weight:800;
+    font-style:italic;
+    font-size:clamp(10px,2vw,12px);
+    color:#666;
+    min-width:40px;
+    text-align:right;
+}
+
+/* ==============================
+   MOBILE DEVICES
+================================= */
+@media (max-width:768px){
+
+    #loader{
+        gap:18px;
+    }
+
+    .brand-area{
+        transform:scale(.9);
+    }
+
+    .tagline{
+        letter-spacing:2px;
+    }
+
+    .bar-wrap{
+        width:85vw;
+    }
+}
+
+@media (max-width:480px){
+
+    .brand-area{
+        transform:scale(.75);
+    }
+
+    .bar-wrap{
+        width:90vw;
+    }
+
+    .tagline{
+        font-size:10px;
+        letter-spacing:1.5px;
+    }
+
+    .tline{
+        width:20px;
+    }
+}
+
+  /* ─── REVEAL ─── */
+  /* Only hide when JS confirms GSAP is ready — prevents permanently-invisible elements */
+  .js-ready .reveal { opacity:0; transform:translateY(30px); }
+  .js-ready .reveal-left { opacity:0; transform:translateX(-30px); }
+  .js-ready .reveal-right { opacity:0; transform:translateX(30px); }
+
+  /* success msg */
+  #form-success {
+    display:none; background:rgba(45,135,255,0.1); border:1px solid var(--blue);
+    border-radius:8px; padding:1rem 1.2rem; font-size:0.9rem; color:var(--blue-bright);
+    margin-top:1rem;
+  }
+/* ─── COMMISSIONING ─── */
+#commissioning {
+  background: var(--deep);
+  padding: 6rem 5%;
+  position: relative;
+  overflow: hidden;
+}
+#commissioning::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(26,110,224,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.commissioning-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 1;
+}
+.commissioning-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+.commissioning-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: all 0.4s;
+}
+.commissioning-card:hover {
+  background: rgba(45,135,255,0.08);
+  border-color: var(--blue-bright);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(26,110,224,0.2);
+}
+.commissioning-card .comm-icon {
+  font-size: 3rem;
+  margin-bottom: 1.2rem;
+}
+.commissioning-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+.commissioning-card p {
+  font-size: 0.9rem;
+  color: var(--steel);
+  line-height: 1.7;
+}
+.commissioning-cta {
+  text-align: center;
+  margin-top: 3.5rem;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 768px) {
+  #commissioning { padding: 4rem 5%; }
+  .commissioning-grid { gap: 1.2rem; }
+  .commissioning-card { padding: 2rem 1.5rem; }
+}
+
+/* ── ENGINEERING SECTION ── */
+#engineering{background:var(--navy);position:relative;overflow:hidden;}
+#engineering::before{content:'';position:absolute;left:-200px;bottom:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(26,110,224,.08) 0%,transparent 70%);pointer-events:none;}
+
+/* Tab switcher */
+.eng-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:3rem;}
+.eng-tab{font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:.5rem 1.1rem;border-radius:6px;cursor:pointer;transition:all .25s;}
+.eng-tab:hover{color:var(--white);border-color:rgba(45,135,255,.4);}
+.eng-tab.active{color:var(--white);background:rgba(45,135,255,.15);border-color:var(--blue-bright);}
+
+/* Tab panes */
+.eng-pane{display:none;}
+.eng-pane.active{display:block;}
+
+/* Pre-project numbered list */
+.preproj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;}
+.preproj-item{display:flex;gap:1rem;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;transition:all .3s;}
+.preproj-item:hover{background:rgba(45,135,255,.08);border-color:var(--blue-bright);}
+.preproj-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:rgba(45,135,255,.35);line-height:1;flex-shrink:0;min-width:28px;}
+.preproj-item p{font-size:.85rem;color:var(--steel);line-height:1.55;}
+
+/* Discipline cards */
+.disc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;}
+.disc-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:1.8rem;transition:all .35s;position:relative;overflow:hidden;}
+.disc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(26,110,224,.12) 0%,transparent 60%);opacity:0;transition:opacity .35s;}
+.disc-card:hover{border-color:var(--blue-bright);transform:translateY(-4px);box-shadow:0 16px 48px rgba(26,110,224,.18);}
+.disc-card:hover::before{opacity:1;}
+.disc-icon{font-size:2rem;margin-bottom:.8rem;}
+.disc-card h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.8rem;color:var(--white);}
+.disc-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;}
+.disc-list li{font-size:.82rem;color:var(--steel);line-height:1.5;display:flex;gap:.5rem;align-items:flex-start;}
+.disc-list li::before{content:'—';color:rgba(45,135,255,.5);flex-shrink:0;margin-top:.05rem;}
+
+/* Commitment banner */
+.eng-commitment{margin-top:3.5rem;background:rgba(26,110,224,.08);border:1px solid rgba(45,135,255,.25);border-left:4px solid var(--blue-bright);border-radius:10px;padding:1.8rem 2rem;display:flex;gap:1.5rem;align-items:flex-start;}
+.eng-commitment-icon{font-size:2rem;flex-shrink:0;}
+.eng-commitment p{font-size:.92rem;color:var(--steel);line-height:1.7;}
+
+
+
+</style>
+</head>
+<body>
+
+<!-- ─── LOADER ─── -->
+<!--<div id="loader">
+  <img src="./Assests/logo.jpeg" alt="Pro Tissue" onerror="this.style.display='none'">
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div> -->
+
+<div id="loader">
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+
+      
+      <div class="brand-area" id="ba">
+
+        <span class="bl white">P</span>
+        <span class="bl white">R</span>
+        <span class="bl white">O</span>
+
+        <!-- Spinning tissue roll -->
+        <div class="roll-wrap" id="rollEl">
+          <svg width="72" height="72" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g class="roll-outer">
+              <ellipse cx="34" cy="34" rx="30" ry="30" fill="#e8e0d0"/>
+              <ellipse cx="34" cy="34" rx="30" ry="30" fill="url(#rg)"/>
+              <ellipse cx="34" cy="34" rx="22" ry="22" fill="#c8b89a"/>
+              <ellipse cx="34" cy="34" rx="22" ry="22" fill="url(#rg2)"/>
+              <ellipse cx="34" cy="34" rx="13" ry="13" fill="#7a5c3a"/>
+              <ellipse cx="34" cy="34" rx="9"  ry="9"  fill="#5a3e22"/>
+              <ellipse cx="34" cy="34" rx="5"  ry="5"  fill="#3a2410"/>
+              <!-- tick marks to show rotation -->
+              <line x1="34" y1="4"  x2="34" y2="12" stroke="#d0c8b8" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="34" y1="56" x2="34" y2="64" stroke="#d0c8b8" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="4"  y1="34" x2="12" y2="34" stroke="#d0c8b8" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="56" y1="34" x2="64" y2="34" stroke="#d0c8b8" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="10" y1="13" x2="16" y2="19" stroke="#d0c8b8" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="52" y1="49" x2="58" y2="55" stroke="#d0c8b8" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="58" y1="13" x2="52" y2="19" stroke="#d0c8b8" stroke-width="1.2" stroke-linecap="round"/>
+              <line x1="16" y1="49" x2="10" y2="55" stroke="#d0c8b8" stroke-width="1.2" stroke-linecap="round"/>
+            </g>
+            <!-- wavy paper strip -->
+            <g class="paper-strip">
+              <path d="M28 58 Q22 64 18 68 Q14 72 10 68 Q6 64 8 60" stroke="#e8e0d0" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M40 58 Q46 64 50 68 Q54 72 58 68 Q62 64 60 60" stroke="#e0d8c8" stroke-width="5" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- shine overlay -->
+            <ellipse cx="34" cy="34" rx="30" ry="30" fill="url(#shine)" class="roll-shine"/>
+            <defs>
+              <radialGradient id="rg" cx="40%" cy="35%">
+                <stop offset="0%"   stop-color="#fff" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#000" stop-opacity="0.15"/>
+              </radialGradient>
+              <radialGradient id="rg2" cx="45%" cy="40%">
+                <stop offset="0%"   stop-color="#fff" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="#000" stop-opacity="0.2"/>
+              </radialGradient>
+              <radialGradient id="shine" cx="35%" cy="30%">
+                <stop offset="0%"  stop-color="#fff" stop-opacity="0.35"/>
+                <stop offset="60%" stop-color="#fff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <span class="bl blue">T</span>
+        <span class="bl blue">I</span>
+        <span class="bl blue">S</span>
+        <span class="bl blue">S</span>
+        <span class="bl blue">U</span>
+        <span class="bl blue">E</span>
+
+      </div>
+
+      <!-- Tagline -->
+      <div class="tagline-wrap" id="tw">
+        <div class="tline"></div>
+        <div class="tagline">WE VALUE YOUR GOALS</div>
+        <div class="tline"></div>
+      </div>
+
+    </div>
+
+    <!-- Progress bar -->
+    <div class="bar-wrap">
+      <div class="bar-track">
+        <div class="bar-fill" id="bf"></div>
+        <div class="bar-head" id="bh"></div>
+      </div>
+      <div class="pct" id="pc">0%</div>
+    </div>
+
+  </div>
+
+<!-- ─── NAVBAR ─── -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <img src="WhatsApp_Image_2026-04-26_at_3_51_12_PM.jpeg" alt="Pro Tissue" onerror="this.outerHTML='<span style=\'font-family:Bebas Neue,sans-serif;font-size:1.6rem;color:#f0f4ff;letter-spacing:0.05em\'>PRO<span style=\'color:#2d87ff\'>TISSUE</span></span>'">
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#engineering">Engineering</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact" class="nav-cta">Get In Touch</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#about" class="mobile-link">About</a>
+  <a href="#services" class="mobile-link">Services</a>
+  <li><a href="#engineering">Engineering</a></li>
+  <a href="#why" class="mobile-link">Why Us</a>
+  <a href="#experience" class="mobile-link">Experience</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="hero-content" id="heroContent">
+    <!--
+<div class="hero-eyebrow">
+  <span class="dot"></span>
+  India &amp; Global · Solo Expert Consultancy
+</div>
+-->
+    <h1 class="hero-title">
+  Pro <span class="accent">Tissue</span><br>
+  <span class="outline">Paper Consultancy</span>
+</h1>
+    <p class="hero-subtitle">
+      Independent technical consultancy delivering end-to-end support for tissue paper projects, machine optimization, and operational excellence — from concept to commissioning. Proven expertise in managing and optimizing tissue production lines from 30 TPD to 250 TPD, ensuring sustainable growth, efficiency, and superior plant performance.
+    </p>
+
+    
+    <div class="hero-btns">
+      <a href="#contact" class="btn-primary">
+        <span>Request a Discussion</span>
+        <span>→</span>
+      </a>
+      <a href="#services" class="btn-outline">
+        <span>Our Services</span>
+        <span>↓</span>
+      </a>
+    </div>
+  </div>
+    <!-- RIGHT SIDE VISUAL / VIDEO -->
+  <div class="hero-video" id="heroVideo">
+    <!-- Animated visual card (always visible as bg / fallback) -->
+    <div class="hero-visual-card">
+      <div class="hero-vc-badge">🏭</div>
+      <div class="hero-vc-title">Tissue Industry Expertise</div>
+      <div class="hero-vc-stats">
+        <div class="hero-vc-stat"><div class="num">26+</div><div class="lbl">Years Exp.</div></div>
+        <div class="hero-vc-stat"><div class="num">30 - 250TPD</div><div class="lbl">Max Capacity</div></div>
+        <div class="hero-vc-stat"><div class="num">100%</div><div class="lbl">OEM Neutral</div></div>
+        <div class="hero-vc-stat"><div class="num">4</div><div class="lbl">Core Services</div></div>
+      </div>
+      <div class="hero-vc-tags">
+        <span class="hero-vc-tag">Crescent Former</span>
+        <span class="hero-vc-tag">Yankee Dryer</span>
+        <span class="hero-vc-tag">Greenfield</span>
+        <span class="hero-vc-tag">Engineering Support</span>
+      </div>
+      
+    </div>
+    <!-- Video overlays on top when it loads -->
+    <img src="./Assests/machine.jpeg"
+     alt="Tissue Machine"
+     class="hero-image">
+  </div>
+
+
+
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ─── COMMISSIONING ─── -->
+<section id="commissioning">
+  <div class="commissioning-header reveal">
+    <div class="section-label" style="justify-content:center;">End-to-End Support</div>
+    <h2 class="section-title">Commissioning & <span style="color:var(--blue-bright)">Beyond</span></h2>
+    <p class="section-sub" style="margin:0 auto;text-align:center;">From first sheet to full production — hands-on support that ensures your tissue line delivers from day one.</p>
+  </div>
+
+  <div class="commissioning-grid">
+    <div class="commissioning-card reveal">
+      <div class="comm-icon">🚀</div>
+      <h3>Machine Startup</h3>
+      <p>On-site commissioning assistance for crescent former machines, Yankee dryers, and complete tissue lines — ensuring safe and efficient startup.</p>
+    </div>
+    <div class="commissioning-card reveal">
+      <div class="comm-icon">📈</div>
+      <h3>Production Ramp-Up</h3>
+      <p>Structured ramp-up plans to take your machine from initial run to design capacity quickly, with real-time troubleshooting and parameter tuning.</p>
+    </div>
+    <div class="commissioning-card reveal">
+      <div class="comm-icon">🎓</div>
+      <h3>Training & SOPs</h3>
+      <p>Comprehensive operator and engineer training programs, plus detailed SOP development for sustainable long-term performance.</p>
+    </div>
+    <div class="commissioning-card reveal">
+  <div class="comm-icon">⚙️</div>
+  <h3>Engineering Support</h3>
+  <p>
+    End-to-end engineering support for tissue projects including basic and detailed engineering, process optimization, layouts, utility planning, and execution-ready solutions for 50 TPD to 250 TPD tissue plants.
+  </p>
+</div>
+  </div>
+
+  <div class="commissioning-cta reveal">
+    <a href="#contact" class="btn-primary">
+      <span>Discuss Your Commissioning Needs</span>
+      <span>→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ─── TICKER ─── -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">Tissue Project Consultancy <span>✦</span></span>
+    <span class="ticker-item">Machine & Process Optimization <span>✦</span></span>
+    <span class="ticker-item">OEM Neutral Advice <span>✦</span></span>
+    <span class="ticker-item">Commissioning Support <span>✦</span></span>
+    <span class="ticker-item">Greenfield & Brownfield Projects <span>✦</span></span>
+    <span class="ticker-item">Yankee Dryer Evaluation <span>✦</span></span>
+    <span class="ticker-item">Energy Optimization <span>✦</span></span>
+    <span class="ticker-item">Vendor Technical Evaluation <span>✦</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">Tissue Project Consultancy <span>✦</span></span>
+    <span class="ticker-item">Machine & Process Optimization <span>✦</span></span>
+    <span class="ticker-item">OEM Neutral Advice <span>✦</span></span>
+    <span class="ticker-item">Commissioning Support <span>✦</span></span>
+    <span class="ticker-item">Greenfield & Brownfield Projects <span>✦</span></span>
+    <span class="ticker-item">Yankee Dryer Evaluation <span>✦</span></span>
+    <span class="ticker-item">Energy Optimization <span>✦</span></span>
+    <span class="ticker-item">Vendor Technical Evaluation <span>✦</span></span>
+  </div>
+</div>
+
+<!-- ─── ABOUT ─── -->
+<section id="about">
+  <div class="about-grid">
+
+    <div class="about-visual reveal-left">
+      <div class="about-icon-grid">
+
+        <div class="about-icon-card">
+          <div class="icon">🏭</div>
+          <p>Tissue Machine Operations</p>
+        </div>
+
+        <div class="about-icon-card">
+          <div class="icon">⚙️</div>
+          <p>Process Engineering</p>
+        </div>
+
+        <div class="about-icon-card">
+          <div class="icon">📐</div>
+          <p>Project Execution</p>
+        </div>
+
+        <div class="about-icon-card">
+          <div class="icon">🌍</div>
+          <p>Global Exposure</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="about-text reveal-right">
+      <div class="section-label">About Pro Tissue</div>
+
+      <h2 class="section-title">
+        Specialized <span style="color:var(--blue-bright)">Consultancy</span>
+      </h2>
+
+      <p class="section-sub">
+        Pro Tissue is a specialized consultancy focused exclusively on tissue paper projects,
+        delivering OEM-neutral, practical, and performance-driven solutions for clients worldwide.
+      </p>
+
+      <div class="tags">
+        <span class="tag">Independent</span>
+        <span class="tag">OEM-Neutral</span>
+        <span class="tag">Confidential</span>
+        <span class="tag">Client-Focused</span>
+        <span class="tag">Chennai, India</span>
+      </div>
+
+      <div class="vm-cards">
+
+        <div class="vm-card">
+          <h4>🎯 Vision</h4>
+          <p>
+            To be a trusted technical partner for tissue paper manufacturers
+            seeking reliable project execution and continuous performance improvement.
+          </p>
+        </div>
+
+        <div class="vm-card">
+          <h4>🚀 Mission</h4>
+          <p>
+            To deliver practical, technology-driven consultancy that improves
+            productivity, quality, and profitability of tissue mills worldwide.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── SERVICES ─── -->
+<section id="services">
+  <div class="reveal" style="text-align:center;margin-bottom:1rem;">
+    <div class="section-label" style="justify-content:center;">What We Do</div>
+    <h2 class="section-title">Our Core <span style="color:var(--blue-bright)">Services</span></h2>
+    <p class="section-sub" style="margin:0 auto;text-align:center;">End-to-end technical support from concept to commissioning and beyond.</p>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-number">01</div>
+      <div class="service-icon">🏗️</div>
+      <h3>Tissue Project Consultancy</h3>
+      <p>Greenfield & brownfield projects, process design, technology selection, machine configuration, utility & energy balance reviews.</p>
+      <div class="service-tags">
+        <span class="service-tag">Greenfield</span>
+        <span class="service-tag">Brownfield</span>
+        <span class="service-tag">Process Design</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-number">02</div>
+      <div class="service-icon">⚙️</div>
+      <h3>Machine & Process Optimization</h3>
+      <p>Operational audits, Yankee dryer & hood evaluation, creping & reel performance optimization, GSM, bulk, softness & efficiency improvements.</p>
+      <div class="service-tags">
+        <span class="service-tag">Yankee Dryer</span>
+        <span class="service-tag">Creping</span>
+        <span class="service-tag">Energy</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-number">03</div>
+      <div class="service-icon">🔍</div>
+      <h3>Vendor & OEM Technical Support</h3>
+      <p>OEM comparison & evaluation, bid technical review, machine layout & interface review, FAT & SAT independent acceptance support.</p>
+      <div class="service-tags">
+        <span class="service-tag">OEM Neutral</span>
+        <span class="service-tag">FAT & SAT</span>
+        <span class="service-tag">Bid Review</span>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="service-number">04</div>
+      <div class="service-icon">🚀</div>
+      <h3>Commissioning & Optimization</h3>
+      <p>Machine startup assistance, production ramp-up, SOP development, operator & engineer training, short- and long-term optimization plans.</p>
+      <div class="service-tags">
+        <span class="service-tag">Startup</span>
+        <span class="service-tag">Training</span>
+        <span class="service-tag">SOP</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ENGINEERING SECTION ═══ -->
+<section id="engineering">
+  <div class="reveal" style="text-align:center;margin-bottom:2.5rem;">
+    <div class="section-label" style="justify-content:center;">Full-Spectrum Engineering</div>
+    <h2 class="section-title">Engineering, Project Management<br><span style="color:var(--blue-bright)">&amp; Consultancy Services</span></h2>
+    <p class="section-sub" style="margin:0 auto;text-align:center;">Comprehensive multidisciplinary engineering and project management solutions for greenfield, brownfield, expansion, modernization and debottlenecking projects in the pulp and paper industry.</p>
+  </div>
+
+  <!-- Tab Switcher -->
+  <div class="eng-tabs reveal" id="engTabs">
+    <button class="eng-tab active" onclick="showEngTab('preproject',this)">Pre-Project Activities</button>
+    <button class="eng-tab" onclick="showEngTab('basic',this)">Basic Engineering</button>
+    <button class="eng-tab" onclick="showEngTab('process',this)">Process Engineering</button>
+    <button class="eng-tab" onclick="showEngTab('mechanical',this)">Mechanical</button>
+    <button class="eng-tab" onclick="showEngTab('instrumentation',this)">Instrumentation &amp; Automation</button>
+    <button class="eng-tab" onclick="showEngTab('pm',this)">Project Management</button>
+    <button class="eng-tab" onclick="showEngTab('procurement',this)">Procurement</button>
+    <button class="eng-tab" onclick="showEngTab('optimization',this)">Process Optimization</button>
+  </div>
+
+  <!-- PRE-PROJECT -->
+  <div class="eng-pane active" id="pane-preproject">
+    <div class="preproj-grid">
+      <div class="preproj-item"><span class="preproj-num">01</span><p>Preparation of Detailed Project Budget with Comprehensive Cost Breakup.</p></div>
+      <div class="preproj-item"><span class="preproj-num">02</span><p>Development of Project Schedule with Micro-Level Activity Planning and Milestone Tracking.</p></div>
+      <div class="preproj-item"><span class="preproj-num">03</span><p>Appointment and Mobilization of the Project Management Team.</p></div>
+      <div class="preproj-item"><span class="preproj-num">04</span><p>Site Survey and Topographical Assessment.</p></div>
+      <div class="preproj-item"><span class="preproj-num">05</span><p>Soil Investigation and Geotechnical Study <em style="color:rgba(143,163,191,.6)">(Optional)</em>.</p></div>
+      <div class="preproj-item"><span class="preproj-num">06</span><p>Environmental Impact Assessment and Environmental Clearance <em style="color:rgba(143,163,191,.6)">(Optional)</em>.</p></div>
+      <div class="preproj-item"><span class="preproj-num">07</span><p>Utility Assessment — Water, Power, Steam, Compressed Air, etc.</p></div>
+      <div class="preproj-item"><span class="preproj-num">08</span><p>Land Verification and Statutory Compliance Review.</p></div>
+      <div class="preproj-item"><span class="preproj-num">09</span><p>Risk Assessment and Mitigation Planning.</p></div>
+      <div class="preproj-item"><span class="preproj-num">10</span><p>Vendor Identification and Preliminary Technical Evaluation.</p></div>
+      <div class="preproj-item"><span class="preproj-num">11</span><p>Preparation of Basic Engineering Package and Design Criteria.</p></div>
+      <div class="preproj-item"><span class="preproj-num">12</span><p>Procurement Strategy Development.</p></div>
+      <div class="preproj-item"><span class="preproj-num">13</span><p>Project Execution Methodology and Resource Planning.</p></div>
+      <div class="preproj-item"><span class="preproj-num">14</span><p>Project Kick-off Meeting and Alignment with Plant Manager.</p></div>
+    </div>
+  </div>
+
+  <!-- BASIC ENGINEERING -->
+  <div class="eng-pane" id="pane-basic">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">📐</div><h3>Basic Engineering</h3><ul class="disc-list"><li>Conceptual Mill Layout Development</li><li>Basic Design Report (BDR) Preparation</li><li>Capacity Determination and Equipment Sizing</li><li>HT &amp; LT Single Line Diagram Development</li><li>Process Control Philosophy Preparation</li><li>Paper Machine and Auxiliary Equipment Selection</li></ul></div>
+    </div>
+  </div>
+
+  <!-- PROCESS ENGINEERING -->
+  <div class="eng-pane" id="pane-process">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">🔬</div><h3>Process Engineering</h3><ul class="disc-list"><li>Water and Mass Balance Calculations</li><li>Process Flow Diagrams (PFD) and P&amp;ID Development</li><li>Pulping, Stock Preparation, Approach Flow and Paper Machine Design</li><li>Vacuum System Design and Calculations</li><li>Steam and Condensate System Engineering</li><li>Boiler Capacity Assessment and Utility Calculations</li><li>Fiber Recovery and Reject Handling System Design</li><li>Broke Handling System Design</li><li>Machine Clothing Recommendations</li><li>Finishing House and Conversion Equipment Engineering</li><li>Effluent Treatment Plant Design and Equipment Selection</li></ul></div>
+    </div>
+  </div>
+
+  <!-- MECHANICAL -->
+  <div class="eng-pane" id="pane-mechanical">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">🔩</div><h3>Mechanical Engineering</h3><ul class="disc-list"><li>Detailed Plant Layouts and Equipment Arrangements</li><li>Piping Design, Sizing and Routing</li><li>Pipe Rack and Utility Corridor Engineering</li><li>Tank Design and Fabrication Drawings</li><li>Steam Piping Isometrics and Stress Analysis</li><li>Equipment Lists, Valve Schedules and Material Take-Offs</li><li>Civil Scope Definition and Coordination Drawings</li></ul></div>
+    </div>
+  </div>
+
+  <!-- INSTRUMENTATION -->
+  <div class="eng-pane" id="pane-instrumentation">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">🖥️</div><h3>Instrumentation &amp; Automation Engineering</h3><ul class="disc-list"><li>DCS, QCS and PLC Engineering</li><li>Control Room, UPS and I/O Rack Room Design</li><li>Instrument Layout and Cable Tray Routing</li><li>I/O Lists, Loop Diagrams and Interconnection Schedules</li><li>Process Control Logic Development</li><li>Plant Communication Network Design</li><li>Instrument Air and Mill Air System Engineering</li></ul></div>
+    </div>
+  </div>
+
+  <!-- PROJECT MANAGEMENT -->
+  <div class="eng-pane" id="pane-pm">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">📊</div><h3>Project Management Services</h3><ul class="disc-list"><li>Project Planning, Scheduling and Monitoring</li><li>Cost Control and Budget Management</li><li>Procurement Coordination and Vendor Management</li><li>Contract Administration and Commercial Negotiations</li><li>Construction Supervision and Progress Tracking</li><li>Store and Inventory Management</li><li>Consultant and Contractor Coordination</li></ul></div>
+    </div>
+  </div>
+
+  <!-- PROCUREMENT -->
+  <div class="eng-pane" id="pane-procurement">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">📦</div><h3>Procurement Assistance</h3><ul class="disc-list"><li>Technical Specification Preparation</li><li>Vendor Evaluation and Technical Bid Analysis</li><li>Equipment Selection and Procurement Support</li><li>Purchase Order Review and Expediting</li><li>Inspection and Quality Assurance Support</li></ul></div>
+    </div>
+  </div>
+
+  <!-- OPTIMIZATION -->
+  <div class="eng-pane" id="pane-optimization">
+    <div class="disc-grid">
+      <div class="disc-card"><div class="disc-icon">📈</div><h3>Process Optimization &amp; Performance Improvement</h3><ul class="disc-list"><li>Process Audits and Performance Assessment</li><li>Energy Conservation Studies</li><li>Water Consumption Reduction Programs</li><li>Chemical Consumption Optimization</li><li>Productivity Enhancement and Cost Reduction Initiatives</li><li>System Reliability and Operational Excellence Programs</li></ul></div>
+    </div>
+  </div>
+
+  <!-- Commitment -->
+  <div class="eng-commitment reveal">
+    <div class="eng-commitment-icon">🎯</div>
+    <div>
+      <p style="color:var(--white);font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.5rem;letter-spacing:.04em;text-transform:uppercase;">Our Commitment</p>
+      <p>We deliver technically superior, economically viable, and sustainable solutions that enhance productivity, reduce operating costs, improve product quality, and ensure timely project execution — backed by professional expertise, practical industry experience, and a results-driven approach.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:3rem;" class="reveal">
+    <a href="#contact" class="btn-primary"><span>Discuss Your Engineering Needs</span><span>→</span></a>
+  </div>
+</section>
+
+<!-- ─── WHY US ─── -->
+<section id="why">
+  <div class="why-grid">
+    <div class="reveal-left">
+      <div class="section-label">Why Pro Tissue</div>
+      <h2 class="section-title">Independent.<br><span style="color:var(--blue-bright)">Experienced.</span><br>Practical.</h2>
+      <p class="section-sub" style="margin-bottom:2rem;">We bring hands-on tissue machine experience with zero vendor bias — your success is the only agenda.</p>
+
+      <div style="margin-top:2rem;">
+        <div class="section-label" style="margin-bottom:1rem;">Industries Served</div>
+        <div class="industries-list">
+          <div class="industry-item"><span>🏭</span> Tissue Paper Manufacturers</div>
+          <div class="industry-item"><span>💡</span> New Investors & Greenfield Startups</div>
+          <div class="industry-item"><span>📈</span> Brownfield Expansion Projects</div>
+          <div class="industry-item"><span>🔄</span> Converting & Jumbo Roll Producers</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why-list reveal-right">
+      <div class="why-item">
+        <div class="why-check">✓</div>
+        <div class="why-item-text">
+          <h4>Independent & OEM-Neutral Advice</h4>
+          <p>Recommendations based solely on technical suitability — never vendor alignment or commercial interests.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-check">✓</div>
+        <div class="why-item-text">
+          <h4>Hands-On Tissue Machine Experience</h4>
+          <p>Deep operational expertise across crescent formers, Yankee systems, and multi-ply tissue grades.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-check">✓</div>
+        <div class="why-item-text">
+          <h4>Practical, Result-Oriented Approach</h4>
+          <p>Solutions that are operationally feasible and focused on long-term performance gains.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-check">✓</div>
+        <div class="why-item-text">
+          <h4>Global Exposure – Asia, Middle East & Beyond</h4>
+          <p>International project experience with diverse manufacturing environments and standards.</p>
+        </div>
+      </div>
+      <div class="why-item">
+        <div class="why-check">✓</div>
+        <div class="why-item-text">
+          <h4>Direct Senior Consultant Involvement</h4>
+          <p>No junior handoffs — senior expertise from proposal through delivery.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── EXPERIENCE ─── -->
+<section id="experience">
+  <div class="reveal" style="margin-bottom:4rem;">
+    <div class="section-label">Track Record</div>
+    <h2 class="section-title">Project <span style="color:var(--blue-bright)">Experience</span></h2>
+    <p class="section-sub">Pro Tissue has supported tissue paper projects across various stages including feasibility, commissioning, and operational optimization.</p>
+  </div>
+
+  <div class="exp-grid">
+    <div class="exp-highlight reveal-left">
+      <div class="big-num">30–250</div>
+      <p>Tonnes Per Day<br>Machine Capacity Range</p>
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+        <div style="font-size:0.8rem;color:var(--steel);line-height:1.8;">
+          Crescent Former Machines<br>
+          Single-layer & Multi-ply<br>
+          Greenfield & Brownfield<br>
+          Asia · Middle East · India
+        </div>
+      </div>
+      <div style="margin-top:1.5rem;">
+        <div style="font-size:0.75rem;color:var(--blue-bright);font-family:'Syne',sans-serif;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;">References on Request</div>
+        <div style="font-size:0.8rem;color:var(--steel);margin-top:0.4rem;">Shared under confidentiality</div>
+      </div>
+    </div>
+
+    <div class="exp-items">
+      <div class="exp-item reveal">
+        <div class="exp-bullet"></div>
+        <div>
+          <h4>Crescent Former Tissue Machines</h4>
+          <p>Hands-on experience with crescent former configurations across multiple capacity ranges, including startup, optimization, and troubleshooting support.</p>
+        </div>
+      </div>
+      <div class="exp-item reveal">
+        <div class="exp-bullet"></div>
+        <div>
+          <h4>Single-layer & Multi-ply Tissue Grades</h4>
+          <p>Quality optimization across standard tissue grades, facial, towel, and specialty products with focus on softness, GSM, and bulk targets.</p>
+        </div>
+      </div>
+      <div class="exp-item reveal">
+        <div class="exp-bullet"></div>
+        <div>
+          <h4>Energy & Productivity Optimization</h4>
+          <p>Steam, condensate, and hood optimization projects delivering measurable efficiency improvements in energy consumption and machine productivity.</p>
+        </div>
+      </div>
+      <div class="exp-item reveal">
+        <div class="exp-bullet"></div>
+        <div>
+          <h4>Feasibility & Technology Selection</h4>
+          <p>Project feasibility assessments and technology evaluation support for new investors and expansion projects, with OEM-neutral recommendations.</p>
+        </div>
+      </div>
+      <div class="exp-item reveal">
+        <div class="exp-bullet"></div>
+        <div>
+          <h4>Commissioning & Ramp-Up Support</h4>
+          <p>End-to-end commissioning assistance from machine startup through full production ramp-up, including operator training and SOP development.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONTACT ─── -->
+<section id="contact">
+  <div class="reveal" style="text-align:center;margin-bottom:4rem;">
+    <div class="section-label" style="justify-content:center;">Get In Touch</div>
+    <h2 class="section-title">Start a Confidential<br><span style="color:var(--blue-bright)">Discussion</span></h2>
+    <p class="section-sub" style="margin:0 auto;text-align:center;">All enquiries are handled with strict confidentiality. Reach out to explore how Pro Tissue can support your project.</p>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-form reveal-left">
+      <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:2rem;">Send a Message</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="name" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Company</label>
+          <input type="text" id="company" placeholder="Company name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="message" placeholder="Tell us about your project or inquiry..."></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center;" onclick="handleSubmit()">
+        <span>Send Message</span>
+        <span>→</span>
+      </button>
+      <div id="form-success">✓ Thank you! Your message has been received. We'll be in touch shortly.</div>
+    </div>
+
+    <div class="contact-info reveal-right">
+      <div class="info-card">
+        <div class="info-icon">📍</div>
+        <div>
+          <h4>Location</h4>
+          <p>New No.163, Ground Floor, East Madha Church Street, Chetty Thottam, Royapuram, Chennai, Tamil Nadu 600013<br><span style="font-size:0.82rem;color:rgba(143,163,191,0.6)">Serving global clients across Asia, Middle East & beyond</span></p>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🌐</div>
+        <div>
+          <h4>Global Reach</h4>
+          <p>protissue.in</p>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">⏱️</div>
+        <div>
+          <h4>Response Time</h4>
+          <p>Typically within 24–48 business hours</p>
+        </div>
+      </div>
+      <div class="confidential-note">
+        <span>🔒</span>
+        <span>All discussions are treated with strict confidentiality. Project references and detailed experience are shared upon request under NDA if required.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="WhatsApp_Image_2026-04-26_at_3_51_12_PM.jpeg" alt="Pro Tissue" onerror="this.outerHTML='<div style=\'font-family:Bebas Neue,sans-serif;font-size:1.8rem;color:#f0f4ff;letter-spacing:0.05em;margin-bottom:1rem\'>PRO<span style=\'color:#2d87ff\'>TISSUE</span></div>'">
+      <p>Professional tissue industry projects & consultancy. Independent, OEM-neutral expertise for tissue paper manufacturing excellence.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Services</h5>
+      <ul>
+        <li><a href="#services">Project Consultancy</a></li>
+        <li><a href="#services">Machine Optimization</a></li>
+        <li><a href="#services">OEM Evaluation</a></li>
+        <li><a href="#services">Commissioning Support</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#why">Why Pro Tissue</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Pro Tissue. All rights reserved. Chennai, India.</p>
+    <p style="color:var(--blue-bright);font-size:0.8rem;font-family:'Syne',sans-serif;">Professional Tissue Industry Projects & Consultancy</p>
+  </div>
+</footer>
+
+<script>
+
+  /* ─────────────────────────────────────
+   ENGINEERING TAB SWITCHER
+───────────────────────────────────── */
+function showEngTab(id, btn){
+  document.querySelectorAll('.eng-pane').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.eng-tab').forEach(function(b){ b.classList.remove('active'); });
+  var pane=document.getElementById('pane-'+id);
+  if(pane){ pane.classList.add('active'); }
+  if(btn){ btn.classList.add('active'); }
+}
+
+    const allLetters = document.querySelectorAll('.bl');
+    const proLetters  = document.querySelectorAll('.bl.white');
+    const tissLetters = document.querySelectorAll('.bl.blue');
+    const rollEl = document.getElementById('rollEl');
+    const tw     = document.getElementById('tw');
+    const bf     = document.getElementById('bf');
+    const bh     = document.getElementById('bh');
+    const pc     = document.getElementById('pc');
+    const loader = document.getElementById('loader');
+
+    let raf;
+
+    /* ease in-out quad */
+    function ease(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function startLoader() {
+      /* -- Animate PRO letters -- */
+      [...proLetters].forEach((l, i) => {
+        setTimeout(() => {
+          l.style.transition = 'opacity 500ms ease, transform 680ms cubic-bezier(0.16,1,0.3,1)';
+          l.style.opacity    = '1';
+          l.style.transform  = 'rotate3d(0,0,0,0deg) scale(1)';
+        }, 100 + i * 90);
+      });
+
+      /* -- Animate roll -- */
+      setTimeout(() => {
+        rollEl.style.transition = 'opacity 500ms ease, transform 700ms cubic-bezier(0.16,1,0.3,1)';
+        rollEl.style.opacity    = '1';
+        rollEl.style.transform  = 'scale(1) rotate(0deg)';
+      }, 100 + proLetters.length * 90 + 60);
+
+      /* -- Animate TISSUE letters -- */
+      [...tissLetters].forEach((l, i) => {
+        setTimeout(() => {
+          l.style.transition = 'opacity 500ms ease, transform 680ms cubic-bezier(0.16,1,0.3,1)';
+          l.style.opacity    = '1';
+          l.style.transform  = 'rotate3d(0,0,0,0deg) scale(1)';
+        }, 100 + (proLetters.length + 1) * 90 + 120 + i * 90);
+      });
+
+      const lastDelay = 100 + (proLetters.length + 1 + tissLetters.length) * 90 + 220;
+
+      /* -- Tagline -- */
+      setTimeout(() => {
+        tw.style.transition = 'opacity 600ms ease';
+        tw.style.opacity    = '1';
+      }, lastDelay);
+
+      /* -- Percent label -- */
+      setTimeout(() => {
+        pc.style.transition = 'opacity 300ms ease';
+        pc.style.opacity    = '1';
+      }, lastDelay + 80);
+
+      /* -- Progress bar -- */
+      const barStart = lastDelay + 160;
+      const barDur   = 2000;
+      let t0 = null;
+
+      setTimeout(() => {
+        function step(ts) {
+          if (!t0) t0 = ts;
+          const raw = Math.min((ts - t0) / barDur, 1);
+          const p   = ease(raw) * 100;
+
+          bf.style.width  = p + '%';
+          bh.style.left   = 'calc(' + p + '% - 16px)';
+          pc.textContent  = Math.round(p) + '%';
+
+          if (raw < 1) {
+            raf = requestAnimationFrame(step);
+          } else {
+            /* -- Hide loader after complete -- */
+            setTimeout(() => {
+              loader.style.transition = 'opacity 600ms ease';
+              loader.style.opacity    = '0';
+              setTimeout(() => { loader.style.display = 'none'; }, 650);
+            }, 400);
+          }
+        }
+        raf = requestAnimationFrame(step);
+      }, barStart);
+    }
+
+    /* Run on page load */
+    
+// ─── GSAP INIT ───
+function initAnimations() {
+  gsap.registerPlugin(ScrollTrigger, TextPlugin, ScrollToPlugin);
+
+  // Hero entrance
+  const tl = gsap.timeline({ delay: 0.2 });
+  tl.from('.hero-eyebrow', { y: 20, opacity: 0, duration: 0.6 })
+    .from('.hero-title', { y: 50, opacity: 0, duration: 0.8, ease:'power3.out' }, '-=0.3')
+    .from('.hero-subtitle', { y: 20, opacity: 0, duration: 0.6 }, '-=0.4')
+    .from('.hero-btns > *', { y: 20, opacity: 0, duration: 0.5, stagger: 0.15 }, '-=0.3')
+    .from('.stat-card', { x: 40, opacity: 0, duration: 0.6, stagger: 0.12, ease:'power2.out' }, '-=0.5');
+
+  // Counters
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = +el.dataset.count;
+    gsap.to({ val: 0 }, {
+      val: target, duration: 2, delay: 0.8,
+      onUpdate: function() { el.textContent = Math.round(this.targets()[0].val); }
+    });
+  });
+
+  // Scroll reveals — using fromTo for guaranteed start state
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, ease:'power2.out',
+        scrollTrigger: { trigger: el, start:'top 90%', once: true }
+      }
+    );
+  });
+  gsap.utils.toArray('.reveal-left').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, x: -30 },
+      { opacity: 1, x: 0, duration: 0.8, ease:'power2.out',
+        scrollTrigger: { trigger: el, start:'top 90%', once: true }
+      }
+    );
+  });
+  gsap.utils.toArray('.reveal-right').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, x: 30 },
+      { opacity: 1, x: 0, duration: 0.8, ease:'power2.out',
+        scrollTrigger: { trigger: el, start:'top 90%', once: true }
+      }
+    );
+  });
+
+  // Service cards stagger
+  gsap.fromTo('.service-card',
+    { y: 40, opacity: 0 },
+    { y: 0, opacity: 1, duration: 0.7, stagger: 0.15, ease:'power2.out',
+      scrollTrigger: { trigger:'.services-grid', start:'top 90%', once:true }
+    }
+  );
+
+  // Navbar parallax
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  });
+}
+
+// ─── HAMBURGER ───
+const hamburger = document.getElementById('hamburger');
+const mobileNav = document.getElementById('mobileNav');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  mobileNav.classList.toggle('open');
+  
+});
+document.querySelectorAll('.mobile-link').forEach(l => {
+  l.addEventListener('click', (e) => {
+    e.preventDefault();
+    const href = l.getAttribute('href');
+    hamburger.classList.remove('active');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+    // slight delay so menu closes first then scroll
+    setTimeout(() => {
+      const target = document.querySelector(href);
+      if (target) {
+        gsap.to(window, { duration: 0.5, scrollTo: { y: target, offsetY: 80 }, ease: 'power1.inOut' });
+      }
+    }, 100);
+  });
+});
+
+// ─── FORM ───
+function handleSubmit() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const msg = document.getElementById('message').value;
+  if (!name || !email || !msg) {
+    alert('Please fill in your name, email, and message.');
+    return;
+  }
+  const btn = document.querySelector('#contact .btn-primary');
+  btn.innerHTML = '<span>Sending...</span>';
+  btn.style.background = 'var(--steel)';
+  setTimeout(() => {
+    btn.innerHTML = '<span>Message Sent ✓</span>';
+    btn.style.background = '#1a6ee0';
+    document.getElementById('form-success').style.display = 'block';
+    gsap.from('#form-success', { y: 10, opacity: 0, duration: 0.5 });
+    ['name','company','email','message'].forEach(id => { document.getElementById(id).value = ''; });
+  }, 1200);
+}
+
+// ─── SMOOTH ANCHOR ───
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      gsap.to(window, { duration: 0.5, scrollTo: { y: target, offsetY: 80 }, ease: 'power1.inOut' });
+    }
+  });
+});
+
+window.addEventListener('load', startLoader);
+</script>
+
+
+</body>
+</html>
