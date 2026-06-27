@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CE PE High Low Analyzer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0b0e11;
+    --bg-secondary: #131822;
+    --bg-card: #1a2332;
+    --bg-card-hover: #1e2a3d;
+    --bg-input: #0f1624;
+    --border: #2a3a52;
+    --border-accent: #2d4a7a;
+    --text-primary: #e8edf5;
+    --text-secondary: #8899b0;
+    --text-muted: #4a5a70;
+    --green: #00d4a0;
+    --green-bg: rgba(0, 212, 160, 0.08);
+    --green-border: rgba(0, 212, 160, 0.25);
+    --red: #ff4d6a;
+    --red-bg: rgba(255, 77, 106, 0.08);
+    --red-border: rgba(255, 77, 106, 0.25);
+    --amber: #f5a623;
+    --amber-bg: rgba(245, 166, 35, 0.08);
+    --blue: #4d9fff;
+    --blue-bg: rgba(77, 159, 255, 0.08);
+    --blue-border: rgba(77, 159, 255, 0.25);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167, 139, 250, 0.08);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* Header */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #1a56db, #7c3aed);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .header-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.5px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Strike Price Sticky Bar */
+  .strike-bar {
+    position: sticky;
+    top: 60px;
+    z-index: 90;
+    background: #0d1520;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .strike-bar-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .strike-inputs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .strike-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .strike-field label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  .strike-input {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 110px;
+    outline: none;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    transition: border-color 0.2s;
+  }
+
+  .strike-input:focus { border-color: var(--purple); }
+  .strike-input.error { border-color: var(--red); }
+
+  .strike-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .strike-calc-btn {
+    background: rgba(167,139,250,0.12);
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .strike-calc-btn:hover { background: rgba(167,139,250,0.2); }
+
+  .strike-results {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .strike-result-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    white-space: nowrap;
+  }
+
+  .chip-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  .chip-val {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .strike-result-chip.decimal {
+    background: rgba(167,139,250,0.1);
+    border: 1px solid rgba(167,139,250,0.25);
+    color: var(--purple);
+  }
+
+  .strike-result-chip.up {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+  }
+
+  .strike-result-chip.down {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    color: var(--red);
+  }
+
+  .strike-result-chip.raw {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    color: var(--blue);
+  }
+
+  .strike-sep { color: var(--text-muted); font-size: 16px; }
+
+  .strike-error {
+    font-size: 11px;
+    color: var(--red);
+    display: none;
+  }
+  .strike-error.show { display: inline; }
+
+  /* Multiplier badge */
+  .multiplier-badge {
+    font-size: 10px;
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.25);
+    color: var(--amber);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    .strike-bar { top: 60px; padding: 10px 14px; gap: 10px; }
+    .strike-input { width: 90px; }
+    .strike-divider { display: none; }
+  }
+
+  /* Main layout */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px;
+    padding-top: 24px;
+  }
+
+  .page-intro {
+    margin-bottom: 28px;
+  }
+
+  .page-intro h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .page-intro p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Input Panel */
+  .input-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .panel-icon.ce { background: var(--green-bg); }
+  .panel-icon.pe { background: var(--red-bg); }
+
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .panel-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-ce { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .tag-pe { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+
+  /* Two-column OHLC grid */
+  .ohlc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .ohlc-section {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .ohlc-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .ohlc-section-title {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .ohlc-section-title.ce { color: var(--green); }
+  .ohlc-section-title.pe { color: var(--red); }
+
+  .fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+
+  .field-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .field-input::placeholder { color: var(--text-muted); }
+  .field-input:focus { border-color: var(--blue); background: var(--bg-card-hover); }
+  .field-input.error { border-color: var(--red); }
+  .field-input.ce:focus { border-color: var(--green); }
+  .field-input.pe:focus { border-color: var(--red); }
+
+  /* Error message */
+  .error-banner {
+    display: none;
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 16px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .error-banner.show { display: flex; }
+
+  /* Analyze Button */
+  .analyze-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, #1a56db, #7c3aed);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .analyze-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .analyze-btn:active { transform: translateY(0); }
+
+  /* Results Section */
+  .results-section {
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .results-section.show { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Signal Banner */
+  .signal-banner {
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .signal-banner.bullish {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+  }
+
+  .signal-banner.bearish {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+  }
+
+  .signal-banner.neutral {
+    background: var(--amber-bg);
+    border: 1px solid rgba(245, 166, 35, 0.25);
+  }
+
+  .signal-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  .signal-value {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .signal-banner.bullish .signal-label,
+  .signal-banner.bullish .signal-value { color: var(--green); }
+
+  .signal-banner.bearish .signal-label,
+  .signal-banner.bearish .signal-value { color: var(--red); }
+
+  .signal-banner.neutral .signal-label,
+  .signal-banner.neutral .signal-value { color: var(--amber); }
+
+  .signal-meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* Status cards row */
+  .status-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .status-card {
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .status-card.strong-ce {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+  }
+
+  .status-card.weak-ce {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+  }
+
+  .status-card.strong-pe {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+  }
+
+  .status-card.weak-pe {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+  }
+
+  .status-card.neutral-ce,
+  .status-card.neutral-pe {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .status-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .strong-ce .status-icon-wrap { background: rgba(0,212,160,0.15); }
+  .weak-ce .status-icon-wrap { background: rgba(255,77,106,0.15); }
+  .strong-pe .status-icon-wrap { background: rgba(255,77,106,0.15); }
+  .weak-pe .status-icon-wrap { background: rgba(0,212,160,0.15); }
+  .neutral-ce .status-icon-wrap,
+  .neutral-pe .status-icon-wrap { background: var(--bg-input); }
+
+  .status-text .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .status-text .value {
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .strong-ce .value { color: var(--green); }
+  .weak-ce .value { color: var(--red); }
+  .strong-pe .value { color: var(--red); }
+  .weak-pe .value { color: var(--green); }
+  .neutral-ce .value,
+  .neutral-pe .value { color: var(--text-secondary); }
+
+  /* Metrics Grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+
+  .metric-card:hover { border-color: var(--border-accent); }
+
+  .metric-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    letter-spacing: -0.5px;
+  }
+
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+  .metric-value.blue { color: var(--blue); }
+  .metric-value.amber { color: var(--amber); }
+  .metric-value.purple { color: var(--purple); }
+  .metric-value.neutral { color: var(--text-secondary); }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Comparison Table */
+  .comparison-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .comparison-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .compare-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-table td {
+    padding: 12px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(42, 58, 82, 0.4);
+    vertical-align: middle;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  .compare-table td.row-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
+
+  .compare-table td.val {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .val.ce { color: var(--green); }
+  .val.pe { color: var(--red); }
+
+  .diff-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .diff-pill.up { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+  .diff-pill.down { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  .diff-pill.flat { background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border); }
+
+  /* Range bars */
+  .range-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .range-row {
+    margin-bottom: 14px;
+  }
+
+  .range-row:last-child { margin-bottom: 0; }
+
+  .range-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .range-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .range-value {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .range-bar-bg {
+    height: 6px;
+    background: var(--bg-input);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .range-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .range-bar-fill.ce { background: var(--green); }
+  .range-bar-fill.pe { background: var(--red); }
+
+  /* Reset btn */
+  .reset-btn {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .reset-btn:hover { border-color: var(--border-accent); color: var(--text-primary); background: var(--bg-card); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .ohlc-grid { grid-template-columns: 1fr; }
+    .fields-row { grid-template-columns: 1fr 1fr; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .status-row { grid-template-columns: 1fr; }
+    .header-subtitle { display: none; }
+    .main { padding: 16px 14px; }
+    .input-panel { padding: 16px; }
+    .signal-banner { padding: 16px; }
+  }
+
+  @media (max-width: 480px) {
+    .fields-row { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .metric-value { font-size: 18px; }
+  }
+
+  /* Tooltip hover effect on metric */
+  .metric-card { position: relative; overflow: hidden; }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .metric-card.green-accent::before { background: var(--green); opacity: 1; }
+  .metric-card.red-accent::before { background: var(--red); opacity: 1; }
+  .metric-card.blue-accent::before { background: var(--blue); opacity: 1; }
+  .metric-card.amber-accent::before { background: var(--amber); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-icon">CP</div>
+    <div>
+      <div class="header-title">CE PE Analyzer</div>
+      <div class="header-subtitle">Options High-Low Intelligence</div>
+    </div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+</header>
+
+<!-- Sticky Strike Price Calculator Bar -->
+<div class="strike-bar">
+  <span class="strike-bar-label">Strike Calc</span>
+  <span class="multiplier-badge">× 26.11</span>
+
+  <div class="strike-inputs">
+    <div class="strike-field">
+      <label>Candle Value</label>
+      <input type="text" id="s-candle" class="strike-input" placeholder="e.g. 380" inputmode="decimal">
+    </div>
+
+    <div class="strike-field">
+      <label>Premarket</label>
+      <input type="text" id="s-premarket" class="strike-input" placeholder="e.g. 24100" inputmode="decimal">
+    </div>
+
+    <button class="strike-calc-btn" onclick="calcStrike()">⚡ Calculate</button>
+    <span class="strike-error" id="s-error">Enter valid numbers</span>
+  </div>
+
+  <div class="strike-divider"></div>
+
+  <div class="strike-results" id="strike-results" style="display:none">
+    <div class="strike-result-chip raw">
+      <span class="chip-label">Product</span>
+      <span class="chip-val" id="s-product">—</span>
+    </div>
+    <div class="strike-result-chip decimal">
+      <span class="chip-label">Decimal</span>
+      <span class="chip-val" id="s-decimal">—</span>
+    </div>
+    <span class="strike-sep">→</span>
+    <div class="strike-result-chip up">
+      <span class="chip-label">▲ Up Mark</span>
+      <span class="chip-val" id="s-up">—</span>
+    </div>
+    <div class="strike-result-chip down">
+      <span class="chip-label">▼ Down Mark</span>
+      <span class="chip-val" id="s-down">—</span>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+  <div class="page-intro">
+    <h1>High-Low Strength Analyzer</h1>
+    <p>Enter CE and PE OHLC data to analyze market strength, range levels, and swap signals.</p>
+  </div>
+
+  <!-- Input Panel -->
+  <div class="input-panel">
+    <div class="ohlc-grid">
+      <!-- CE Section -->
+      <div class="ohlc-section">
+        <div class="ohlc-section-header">
+          <span class="ohlc-section-title ce">▲ CALL OPTION (CE)</span>
+          <span class="panel-tag tag-ce">BULLISH</span>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Open</label>
+            <input type="text" id="ce-open" class="field-input ce" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">High</label>
+            <input type="text" id="ce-high" class="field-input ce" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Low</label>
+            <input type="text" id="ce-low" class="field-input ce" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Close</label>
+            <input type="text" id="ce-close" class="field-input ce" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+      </div>
+
+      <!-- PE Section -->
+      <div class="ohlc-section">
+        <div class="ohlc-section-header">
+          <span class="ohlc-section-title pe">▼ PUT OPTION (PE)</span>
+          <span class="panel-tag tag-pe">BEARISH</span>
+        </div>
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">Open</label>
+            <input type="text" id="pe-open" class="field-input pe" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">High</label>
+            <input type="text" id="pe-high" class="field-input pe" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Low</label>
+            <input type="text" id="pe-low" class="field-input pe" placeholder="0.00" inputmode="decimal">
+          </div>
+          <div class="field-group">
+            <label class="field-label">Close</label>
+            <input type="text" id="pe-close" class="field-input pe" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" id="error-banner">
+      <span>⚠</span>
+      <span id="error-text">All fields are required. Please enter valid numeric values.</span>
+    </div>
+
+    <!-- Analyze Button -->
+    <button class="analyze-btn" onclick="analyze()">
+      <span>⚡</span> Analyze
+    </button>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section" id="results">
+
+    <!-- Swap Signal Banner -->
+    <div class="signal-banner" id="swap-banner">
+      <div>
+        <div class="signal-label">Swap Signal</div>
+        <div class="signal-value" id="swap-signal-text">—</div>
+      </div>
+      <div class="signal-meta" id="swap-meta"></div>
+    </div>
+
+    <!-- CE / PE Status Cards -->
+    <div class="status-row">
+      <div class="status-card" id="ce-status-card">
+        <div class="status-icon-wrap" id="ce-status-icon">📊</div>
+        <div class="status-text">
+          <div class="label">CE Status</div>
+          <div class="value" id="ce-status-text">—</div>
+        </div>
+      </div>
+      <div class="status-card" id="pe-status-card">
+        <div class="status-icon-wrap" id="pe-status-icon">📊</div>
+        <div class="status-text">
+          <div class="label">PE Status</div>
+          <div class="value" id="pe-status-text">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+      <div class="metric-card green-accent">
+        <div class="metric-label">CE High</div>
+        <div class="metric-value green" id="m-ce-high">—</div>
+        <div class="metric-sub">Call upper level</div>
+      </div>
+      <div class="metric-card red-accent">
+        <div class="metric-label">CE Low</div>
+        <div class="metric-value red" id="m-ce-low">—</div>
+        <div class="metric-sub">Call lower level</div>
+      </div>
+      <div class="metric-card green-accent">
+        <div class="metric-label">PE High</div>
+        <div class="metric-value green" id="m-pe-high">—</div>
+        <div class="metric-sub">Put upper level</div>
+      </div>
+      <div class="metric-card red-accent">
+        <div class="metric-label">PE Low</div>
+        <div class="metric-value red" id="m-pe-low">—</div>
+        <div class="metric-sub">Put lower level</div>
+      </div>
+      <div class="metric-card blue-accent">
+        <div class="metric-label">CE Range</div>
+        <div class="metric-value blue" id="m-ce-range">—</div>
+        <div class="metric-sub">High − Low</div>
+      </div>
+      <div class="metric-card blue-accent">
+        <div class="metric-label">PE Range</div>
+        <div class="metric-value blue" id="m-pe-range">—</div>
+        <div class="metric-sub">High − Low</div>
+      </div>
+      <div class="metric-card amber-accent">
+        <div class="metric-label">Diff High</div>
+        <div class="metric-value amber" id="m-diff-high">—</div>
+        <div class="metric-sub">CE High − PE High</div>
+      </div>
+      <div class="metric-card amber-accent">
+        <div class="metric-label">Diff Low</div>
+        <div class="metric-value amber" id="m-diff-low">—</div>
+        <div class="metric-sub">CE Low − PE Low</div>
+      </div>
+    </div>
+
+    <!-- Range Comparison Bars -->
+    <div class="range-section">
+      <div class="comparison-title">Range Comparison</div>
+      <div class="range-row">
+        <div class="range-header">
+          <span class="range-name" style="color:var(--green)">▲ CE Range</span>
+          <span class="range-value" style="color:var(--green)" id="rb-ce-val">—</span>
+        </div>
+        <div class="range-bar-bg">
+          <div class="range-bar-fill ce" id="rb-ce" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="range-row">
+        <div class="range-header">
+          <span class="range-name" style="color:var(--red)">▼ PE Range</span>
+          <span class="range-value" style="color:var(--red)" id="rb-pe-val">—</span>
+        </div>
+        <div class="range-bar-bg">
+          <div class="range-bar-fill pe" id="rb-pe" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison-panel">
+      <div class="comparison-title">Level Comparison</div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th style="color:var(--green)">CE (Call)</th>
+            <th style="color:var(--red)">PE (Put)</th>
+            <th>Difference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">High</td>
+            <td class="val ce" id="t-ce-high">—</td>
+            <td class="val pe" id="t-pe-high">—</td>
+            <td><span class="diff-pill" id="t-diff-high">—</span></td>
+          </tr>
+          <tr>
+            <td class="row-label">Low</td>
+            <td class="val ce" id="t-ce-low">—</td>
+            <td class="val pe" id="t-pe-low">—</td>
+            <td><span class="diff-pill" id="t-diff-low">—</span></td>
+          </tr>
+          <tr>
+            <td class="row-label">Open</td>
+            <td class="val ce" id="t-ce-open">—</td>
+            <td class="val pe" id="t-pe-open">—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="row-label">Close</td>
+            <td class="val ce" id="t-ce-close">—</td>
+            <td class="val pe" id="t-pe-close">—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td class="row-label">Range</td>
+            <td class="val ce" id="t-ce-range">—</td>
+            <td class="val pe" id="t-pe-range">—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="reset-btn" onclick="reset()">↺ Reset and Analyze Again</button>
+  </div>
+</main>
+
+<script>
+  const MULTIPLIER = 26.11;
+
+  function calcStrike() {
+    const candleEl   = document.getElementById('s-candle');
+    const premktEl   = document.getElementById('s-premarket');
+    const errEl      = document.getElementById('s-error');
+    const resultsEl  = document.getElementById('strike-results');
+
+    candleEl.classList.remove('error');
+    premktEl.classList.remove('error');
+    errEl.classList.remove('show');
+
+    const candle = parseFloat(candleEl.value);
+    const premkt = parseFloat(premktEl.value);
+
+    let valid = true;
+    if (!candleEl.value.trim() || isNaN(candle)) { candleEl.classList.add('error'); valid = false; }
+    if (!premktEl.value.trim() || isNaN(premkt)) { premktEl.classList.add('error'); valid = false; }
+
+    if (!valid) {
+      errEl.classList.add('show');
+      resultsEl.style.display = 'none';
+      return;
+    }
+
+    // Step 1: multiply
+    const product = candle * MULTIPLIER;
+
+    // Step 2: take first 4 digits of the result (ignore decimal point)
+    const productStr = product.toFixed(4).replace('.', '');
+    const first4 = productStr.replace(/^0+/, '').substring(0, 4).padEnd(4, '0');
+
+    // Step 3: format as XX.XX decimal
+    const intPart  = parseInt(first4.substring(0, 2));
+    const decPart  = parseInt(first4.substring(2, 4));
+    const decimalVal = parseFloat(intPart + '.' + (decPart < 10 ? '0' + decPart : decPart));
+
+    // Step 4: Up / Down marks
+    const upMark   = premkt + decimalVal;
+    const downMark = premkt - decimalVal;
+
+    document.getElementById('s-product').textContent  = product.toFixed(2);
+    document.getElementById('s-decimal').textContent  = decimalVal.toFixed(2);
+    document.getElementById('s-up').textContent       = upMark.toFixed(2);
+    document.getElementById('s-down').textContent     = downMark.toFixed(2);
+
+    resultsEl.style.display = 'flex';
+  }
+
+  // Strike input enter key
+  ['s-candle','s-premarket'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') calcStrike();
+    });
+    document.getElementById(id).addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9.]/g, '');
+      this.classList.remove('error');
+      document.getElementById('s-error').classList.remove('show');
+    });
+  });
+
+  const fields = ['ce-open','ce-high','ce-low','ce-close','pe-open','pe-high','pe-low','pe-close'];
+
+  function getVal(id) {
+    return parseFloat(document.getElementById(id).value);
+  }
+
+  function fmt(n) {
+    return n.toFixed(2);
+  }
+
+  function showError(msg) {
+    const banner = document.getElementById('error-banner');
+    document.getElementById('error-text').textContent = msg;
+    banner.classList.add('show');
+  }
+
+  function hideError() {
+    document.getElementById('error-banner').classList.remove('show');
+  }
+
+  function clearInputErrors() {
+    fields.forEach(id => document.getElementById(id).classList.remove('error'));
+  }
+
+  function analyze() {
+    hideError();
+    clearInputErrors();
+
+    let valid = true;
+    let emptyFields = [];
+
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      const val = el.value.trim();
+      if (val === '' || isNaN(parseFloat(val)) || !/^-?\d*\.?\d+$/.test(val)) {
+        el.classList.add('error');
+        emptyFields.push(id);
+        valid = false;
+      }
+    });
+
+    if (!valid) {
+      showError('All 8 fields are required. Please enter valid numeric values only.');
+      return;
+    }
+
+    const ceO = getVal('ce-open'), ceH = getVal('ce-high'),
+          ceL = getVal('ce-low'),  ceC = getVal('ce-close');
+    const peO = getVal('pe-open'), peH = getVal('pe-high'),
+          peL = getVal('pe-low'),  peC = getVal('pe-close');
+
+    const ceRange = ceH - ceL;
+    const peRange = peH - peL;
+    const diffHigh = ceH - peH;
+    const diffLow  = ceL - peL;
+
+    // CE Status
+    let ceStatus = 'NEUTRAL';
+    if (ceC >= ceH - 0.05 * ceRange) ceStatus = 'STRONG';
+    else if (ceC <= ceL + 0.05 * ceRange) ceStatus = 'WEAK';
+
+    // PE Status
+    let peStatus = 'NEUTRAL';
+    if (peC >= peH - 0.05 * peRange) peStatus = 'STRONG';
+    else if (peC <= peL + 0.05 * peRange) peStatus = 'WEAK';
+
+    // Swap Signal
+    let swapSignal = 'NO SWAP';
+    let swapType = 'neutral';
+    let swapMeta = 'CE and PE moving in same direction';
+    if (ceC > ceO && peC < peO) {
+      swapSignal = 'PE → CE SWAP';
+      swapType = 'bullish';
+      swapMeta = 'Bullish flow: money moving from PE to CE';
+    } else if (ceC < ceO && peC > peO) {
+      swapSignal = 'CE → PE SWAP';
+      swapType = 'bearish';
+      swapMeta = 'Bearish flow: money moving from CE to PE';
+    }
+
+    // Populate results
+    document.getElementById('m-ce-high').textContent  = fmt(ceH);
+    document.getElementById('m-ce-low').textContent   = fmt(ceL);
+    document.getElementById('m-pe-high').textContent  = fmt(peH);
+    document.getElementById('m-pe-low').textContent   = fmt(peL);
+    document.getElementById('m-ce-range').textContent = fmt(ceRange);
+    document.getElementById('m-pe-range').textContent = fmt(peRange);
+    document.getElementById('m-diff-high').textContent = (diffHigh >= 0 ? '+' : '') + fmt(diffHigh);
+    document.getElementById('m-diff-low').textContent  = (diffLow >= 0 ? '+' : '') + fmt(diffLow);
+
+    // Table
+    document.getElementById('t-ce-high').textContent  = fmt(ceH);
+    document.getElementById('t-pe-high').textContent  = fmt(peH);
+    document.getElementById('t-ce-low').textContent   = fmt(ceL);
+    document.getElementById('t-pe-low').textContent   = fmt(peL);
+    document.getElementById('t-ce-open').textContent  = fmt(ceO);
+    document.getElementById('t-pe-open').textContent  = fmt(peO);
+    document.getElementById('t-ce-close').textContent = fmt(ceC);
+    document.getElementById('t-pe-close').textContent = fmt(peC);
+    document.getElementById('t-ce-range').textContent = fmt(ceRange);
+    document.getElementById('t-pe-range').textContent = fmt(peRange);
+
+    // Diff pills
+    const dhEl = document.getElementById('t-diff-high');
+    dhEl.textContent = (diffHigh >= 0 ? '▲ +' : '▼ ') + fmt(diffHigh);
+    dhEl.className = 'diff-pill ' + (diffHigh > 0 ? 'up' : diffHigh < 0 ? 'down' : 'flat');
+
+    const dlEl = document.getElementById('t-diff-low');
+    dlEl.textContent = (diffLow >= 0 ? '▲ +' : '▼ ') + fmt(diffLow);
+    dlEl.className = 'diff-pill ' + (diffLow > 0 ? 'up' : diffLow < 0 ? 'down' : 'flat');
+
+    // Range bars
+    document.getElementById('rb-ce-val').textContent = fmt(ceRange);
+    document.getElementById('rb-pe-val').textContent = fmt(peRange);
+    const maxRange = Math.max(ceRange, peRange, 0.001);
+    setTimeout(() => {
+      document.getElementById('rb-ce').style.width = Math.min(100, (ceRange / maxRange) * 100) + '%';
+      document.getElementById('rb-pe').style.width = Math.min(100, (peRange / maxRange) * 100) + '%';
+    }, 100);
+
+    // Swap banner
+    const swapBanner = document.getElementById('swap-banner');
+    swapBanner.className = 'signal-banner ' + swapType;
+    document.getElementById('swap-signal-text').textContent = swapSignal;
+    document.getElementById('swap-meta').textContent = swapMeta;
+
+    // CE Status card
+    const ceCard = document.getElementById('ce-status-card');
+    const ceIcon = document.getElementById('ce-status-icon');
+    const ceText = document.getElementById('ce-status-text');
+    if (ceStatus === 'STRONG') {
+      ceCard.className = 'status-card strong-ce';
+      ceIcon.textContent = '🚀';
+      ceText.textContent = 'CE STRONG';
+    } else if (ceStatus === 'WEAK') {
+      ceCard.className = 'status-card weak-ce';
+      ceIcon.textContent = '📉';
+      ceText.textContent = 'CE WEAK';
+    } else {
+      ceCard.className = 'status-card neutral-ce';
+      ceIcon.textContent = '↔️';
+      ceText.textContent = 'CE NEUTRAL';
+    }
+
+    // PE Status card
+    const peCard = document.getElementById('pe-status-card');
+    const peIcon = document.getElementById('pe-status-icon');
+    const peText = document.getElementById('pe-status-text');
+    if (peStatus === 'STRONG') {
+      peCard.className = 'status-card strong-pe';
+      peIcon.textContent = '⚠️';
+      peText.textContent = 'PE STRONG';
+    } else if (peStatus === 'WEAK') {
+      peCard.className = 'status-card weak-pe';
+      peIcon.textContent = '✅';
+      peText.textContent = 'PE WEAK';
+    } else {
+      peCard.className = 'status-card neutral-pe';
+      peIcon.textContent = '↔️';
+      peText.textContent = 'PE NEUTRAL';
+    }
+
+    const results = document.getElementById('results');
+    results.classList.add('show');
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function reset() {
+    fields.forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).classList.remove('error');
+    });
+    hideError();
+    document.getElementById('results').classList.remove('show');
+    document.getElementById('rb-ce').style.width = '0%';
+    document.getElementById('rb-pe').style.width = '0%';
+    document.getElementById('s-candle').value = '';
+    document.getElementById('s-premarket').value = '';
+    document.getElementById('strike-results').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Allow Enter key to analyze
+  fields.forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyze();
+    });
+  });
+
+  // Only allow numeric input
+  fields.forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+      this.value = this.value.replace(/[^0-9.\-]/g, '');
+      this.classList.remove('error');
+      hideError();
+    });
+  });
+</script>
+</body>
+</html>
