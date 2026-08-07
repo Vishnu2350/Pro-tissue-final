@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSE Symbol Formatter</title>
+<style>
+  :root{
+    --bg:#0b0f0e;
+    --panel:#111714;
+    --panel-2:#151d19;
+    --line:#22322b;
+    --text:#e7f0ea;
+    --muted:#7c9186;
+    --accent:#3ddc84;
+    --accent-dim:#1f7a4a;
+    --mono:'JetBrains Mono','Courier New',monospace;
+    --sans:'Inter','Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, #10251a 0%, transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:920px;margin:0 auto;}
+  header{margin-bottom:26px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{
+    font-size:clamp(24px,4vw,32px);
+    margin:0 0 6px;
+    letter-spacing:-.02em;
+  }
+  .sub{color:var(--muted);font-size:14px;line-height:1.5;max-width:60ch;}
+
+  .board{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    align-items:center;
+  }
+  .row.controls{background:var(--panel-2);}
+  label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:block;
+    margin-bottom:6px;
+  }
+  .field{flex:1;min-width:140px;}
+  select, input[type=text]{
+    width:100%;
+    background:#0e1512;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:14px;
+    padding:9px 10px;
+    border-radius:6px;
+    outline:none;
+    transition:border-color .15s;
+  }
+  select:focus, input[type=text]:focus, textarea:focus{border-color:var(--accent);}
+  select{cursor:pointer;}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  @media (max-width:680px){.cols{grid-template-columns:1fr;}}
+  .col{padding:16px 18px;}
+  .col + .col{border-left:1px solid var(--line);}
+  @media (max-width:680px){.col + .col{border-left:none;border-top:1px solid var(--line);}}
+
+  textarea{
+    width:100%;
+    min-height:260px;
+    resize:vertical;
+    background:#0e1512;
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:13.5px;
+    line-height:1.7;
+    padding:12px;
+    border-radius:6px;
+    outline:none;
+  }
+  textarea#output{color:var(--accent);}
+  .col-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:8px;
+  }
+  .count{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+  .actions{
+    display:flex;
+    gap:10px;
+    padding:14px 18px;
+    background:var(--panel-2);
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.03em;
+    padding:10px 16px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  button.primary{
+    background:var(--accent);
+    color:#04140b;
+    border-color:var(--accent);
+    font-weight:600;
+  }
+  button.primary:hover{background:#4fe897;}
+  button:hover{border-color:var(--accent);color:var(--accent);}
+  button:active{transform:scale(.98);}
+  #copyMsg{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    align-self:center;
+    opacity:0;
+    transition:opacity .2s;
+  }
+  #copyMsg.show{opacity:1;}
+
+  footer{
+    margin-top:16px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.6;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">NSE · Watchlist Builder</div>
+    <h1>Bulk Symbol Formatter</h1>
+    <p class="sub">Paste your symbol list, pick a format, get an exchange-prefixed watchlist ready to paste into TradingView or GoCharting.</p>
+  </header>
+
+  <div class="board">
+    <div class="row controls">
+      <div class="field" style="max-width:180px;">
+        <label for="exchange">Exchange</label>
+        <input type="text" id="exchange" value="NSE">
+      </div>
+      <div class="field" style="max-width:220px;">
+        <label for="mode">Format</label>
+        <select id="mode">
+          <option value="stock">Stock — EXCHANGE:SYMBOL</option>
+          <option value="future">Future — EXCHANGE:SYMBOL-I</option>
+        </select>
+      </div>
+      <div class="field" style="max-width:200px;">
+        <label for="sep">Output separator</label>
+        <select id="sep">
+          <option value=",">Comma ( , )</option>
+          <option value="newline">New line</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="col">
+        <div class="col-head">
+          <label style="margin:0;">Input — paste symbols</label>
+          <span class="count" id="inCount">0 symbols</span>
+        </div>
+        <textarea id="input" placeholder="RELIANCE&#10;TCS&#10;INFY&#10;HDFCBANK&#10;...or comma/space separated, any mix works"></textarea>
+      </div>
+      <div class="col">
+        <div class="col-head">
+          <label style="margin:0;">Output — ready to paste</label>
+          <span class="count" id="outCount">0 symbols</span>
+        </div>
+        <textarea id="output" readonly placeholder="Formatted symbols appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="generateBtn">Generate</button>
+      <button id="copyBtn">Copy output</button>
+      <button id="clearBtn">Clear all</button>
+      <span id="copyMsg">Copied ✓</span>
+    </div>
+  </div>
+
+  <footer>
+    Tip — TradingView / GoCharting watchlist import accepts comma-separated EXCHANGE:SYMBOL lists. Future format appends "-1" per your convention; edit the exchange field for BSE, MCX, etc.
+  </footer>
+</div>
+
+<script>
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const exchange = document.getElementById('exchange');
+  const mode = document.getElementById('mode');
+  const sep = document.getElementById('sep');
+  const inCount = document.getElementById('inCount');
+  const outCount = document.getElementById('outCount');
+  const copyMsg = document.getElementById('copyMsg');
+
+  function parseSymbols(raw){
+    const symbols = [];
+    raw.split(/\r?\n/).forEach(line => {
+      if(!line.trim()) return;
+      // split the row on tabs/commas/spaces and grab tokens
+      const tokens = line.split(/[\t,]+|\s{2,}/).map(t => t.trim()).filter(Boolean);
+      // if line didn't have tabs, fall back to first whitespace-separated token
+      const candidates = tokens.length > 1 ? tokens : line.trim().split(/\s+/);
+      // pick the first token that's pure letters (a real symbol, not a number/date)
+      const symbol = candidates.find(t => /^[A-Za-z&\-]+$/.test(t));
+      if(symbol) symbols.push(symbol.toUpperCase());
+    });
+    return symbols;
+  }
+
+  function generate(){
+    const symbols = parseSymbols(input.value);
+    const ex = (exchange.value.trim() || 'NSE').toUpperCase();
+    const isFuture = mode.value === 'future';
+
+    const formatted = symbols.map(s => isFuture ? `${ex}:${s}-I` : `${ex}:${s}`);
+
+    output.value = sep.value === 'newline' ? formatted.join('\n') : formatted.join(',');
+    inCount.textContent = `${symbols.length} symbol${symbols.length===1?'':'s'}`;
+    outCount.textContent = `${formatted.length} symbol${formatted.length===1?'':'s'}`;
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', generate);
+  [input, exchange, mode, sep].forEach(el => el.addEventListener('input', generate));
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    if(!output.value) return;
+    try{
+      await navigator.clipboard.writeText(output.value);
+    }catch(e){
+      output.select();
+      document.execCommand('copy');
+    }
+    copyMsg.classList.add('show');
+    setTimeout(() => copyMsg.classList.remove('show'), 1400);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    input.value = '';
+    output.value = '';
+    inCount.textContent = '0 symbols';
+    outCount.textContent = '0 symbols';
+  });
+
+  generate();
+</script>
+</body>
+</html>
