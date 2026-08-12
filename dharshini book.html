@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<title>ஒரு கடிதம்</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --room-dark:#15130f;
+    --room-dark-2:#1f1b15;
+    --paper:#efe2c3;
+    --paper-shadow:#ddc9a0;
+    --paper-edge:#c4ad7c;
+    --ink:#3a2c1e;
+    --ink-soft:#6b543a;
+    --cover:#3d2b20;
+    --cover-2:#2a1c14;
+    --seal:#7c2f2f;
+    --gold:#a9812e;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    background:
+      radial-gradient(ellipse 900px 600px at 50% 38%, #2a251d 0%, var(--room-dark) 60%, var(--room-dark-2) 100%);
+    font-family:'EB Garamond', serif;
+    overflow:hidden;
+  }
+  .stage{
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    perspective:2600px;
+  }
+
+  .dust{ position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; overflow:hidden; }
+  .mote{
+    position:absolute; width:3px;height:3px;
+    background:rgba(230,210,160,0.35);
+    border-radius:50%;
+    animation:drift linear infinite;
+    filter:blur(0.3px);
+  }
+  @keyframes drift{
+    from{ transform:translateY(0) translateX(0); opacity:0;}
+    10%{opacity:.6;}
+    90%{opacity:.4;}
+    to{ transform:translateY(-110vh) translateX(30px); opacity:0;}
+  }
+
+  .lamp-glow{
+    position:absolute; top:6%; left:50%; transform:translateX(-50%);
+    width:760px; height:420px;
+    background:radial-gradient(ellipse at center, rgba(255,224,150,0.10), transparent 70%);
+    pointer-events:none;
+  }
+
+  .book-wrap{
+    position:relative;
+    width:min(90vw, 460px);
+    aspect-ratio: 3 / 4.1;
+    max-height:88vh;
+    max-height:88dvh;
+  }
+
+  .shadow-pool{
+    position:absolute; left:50%; bottom:-38px;
+    width:80%; height:36px;
+    background:radial-gradient(ellipse, rgba(0,0,0,0.55), transparent 70%);
+    transform:translateX(-50%);
+    filter:blur(2px);
+  }
+
+  .book{
+    position:relative;
+    width:100%; height:100%;
+    transform-style:preserve-3d;
+  }
+
+  .board{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    background:
+      repeating-linear-gradient(135deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 5px),
+      radial-gradient(ellipse at 30% 20%, #4a3527 0%, transparent 55%),
+      linear-gradient(135deg, var(--cover) 0%, var(--cover-2) 100%);
+    border-radius:3px 12px 12px 3px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.55), inset -6px 0 14px rgba(0,0,0,0.4), inset 0 0 40px rgba(0,0,0,0.25);
+  }
+  .spine{
+    position:absolute; left:0; top:0; bottom:0; width:22px;
+    background:linear-gradient(90deg, #180f0a, #3d2b20 60%, rgba(0,0,0,0));
+    border-radius:3px 0 0 3px;
+    z-index:50;
+  }
+
+  /* gilt page-edge stack — makes the book read as thick, like a Bible */
+  .page-edges{
+    position:absolute;
+    top:6px; bottom:6px; right:-5px;
+    width:9px;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        #c9a44a 0px, #c9a44a 1px,
+        #a9812e 1px, #a9812e 2px,
+        #e8c878 2px, #e8c878 3px
+      );
+    border-radius:0 6px 6px 0;
+    box-shadow:1px 0 3px rgba(0,0,0,0.4), inset -1px 0 2px rgba(0,0,0,0.3);
+    z-index:2;
+  }
+
+  /* ribbon bookmark — hangs out from the bottom like a Bible marker */
+  .ribbon-mark{
+    position:absolute;
+    top:0;
+    left:64%;
+    width:15px;
+    height:calc(100% + 46px);
+    background:linear-gradient(180deg, #9c2b2b 0%, #7c2020 55%, #6a1c1c 100%);
+    box-shadow:0 0 6px rgba(0,0,0,0.35), inset 1px 0 2px rgba(255,255,255,0.15), inset -1px 0 2px rgba(0,0,0,0.25);
+    clip-path: polygon(0 0, 100% 0, 100% 92%, 50% 100%, 0 92%);
+    z-index:0;
+    pointer-events:none;
+  }
+
+  /* single-sided leaves — front content only, blank back */
+  .leaf{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    transform-style:preserve-3d;
+    transform-origin:left center;
+    transition:transform 1s cubic-bezier(.55,.05,.15,1);
+    cursor:pointer;
+    border-radius:2px 10px 10px 2px;
+  }
+  .leaf.flipped{ transform:rotateY(-178deg); }
+
+  .leaf-front{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    backface-visibility:hidden;
+    background:linear-gradient(120deg, var(--paper) 0%, var(--paper-shadow) 100%);
+    border-radius:2px 10px 10px 2px;
+    box-shadow:inset 0 0 40px rgba(90,66,30,0.18), 0 2px 10px rgba(0,0,0,0.25);
+    padding:30px 26px 24px 38px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .leaf-back{
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    backface-visibility:hidden;
+    transform:rotateY(180deg);
+    background:linear-gradient(120deg, var(--paper-shadow) 0%, var(--paper) 100%);
+    border-radius:2px 10px 10px 2px;
+    box-shadow:inset 0 0 30px rgba(90,66,30,0.16);
+  }
+
+  .leaf-front::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(120,90,40,0.10), transparent 35%),
+      radial-gradient(circle at 85% 75%, rgba(120,90,40,0.12), transparent 40%),
+      radial-gradient(circle at 60% 10%, rgba(120,90,40,0.08), transparent 30%);
+    pointer-events:none;
+  }
+  .leaf-front::after{
+    content:"";
+    position:absolute; top:0; left:0; right:0; bottom:0;
+    background:linear-gradient(90deg, rgba(0,0,0,0.14), transparent 12%);
+    pointer-events:none;
+  }
+
+  .page-label{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:.08em;
+    margin-bottom:12px;
+    opacity:.75;
+    flex-shrink:0;
+  }
+
+  .tamil{
+    font-family:'Noto Sans Tamil','EB Garamond',serif;
+    font-size:clamp(14px, 2.6vw, 17px);
+    line-height:1.85;
+    color:var(--ink);
+    overflow:hidden;
+    flex:1;
+    display:flex;
+    align-items:flex-start;
+    padding-top:2px;
+  }
+
+  .greet{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:19px;
+    color:var(--ink);
+    margin:0 0 10px 0;
+    flex-shrink:0;
+  }
+
+  .contact-num{
+    display:block;
+    margin:14px 0;
+    font-family:'EB Garamond', serif;
+    font-size:24px;
+    letter-spacing:.06em;
+    color:var(--seal);
+    border-bottom:1px solid rgba(124,47,47,0.4);
+    padding-bottom:4px;
+    width:fit-content;
+  }
+
+  .sign-off{
+    font-family:'Caveat', cursive;
+    font-size:28px;
+    color:var(--seal);
+    margin-top:14px;
+    align-self:flex-end;
+    transform:rotate(-2deg);
+    flex-shrink:0;
+  }
+
+  /* COVER — full bleed */
+  /* COVER — guaranteed full page, top to bottom, edge to edge */
+  .cover-face{
+    position:absolute !important;
+    top:0 !important; left:0 !important; right:0 !important; bottom:0 !important;
+    width:100% !important;
+    height:100% !important;
+    margin:0 !important;
+  }
+
+  .cover-leaf .leaf-front{
+    background:radial-gradient(ellipse at 50% 30%, var(--cover) 0%, var(--cover-2) 100%);
+    color:#e9d9ad;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0;
+    position:relative;
+  }
+  .cover-frame{
+    position:absolute; top:16px; left:16px; right:16px; bottom:16px;
+    border:1.5px solid rgba(201,164,74,0.55);
+    border-radius:2px 10px 10px 2px;
+  }
+  .cover-frame::before{
+    content:"";
+    position:absolute; top:6px; left:6px; right:6px; bottom:6px;
+    border:1px solid rgba(201,164,74,0.3);
+    border-radius:2px 8px 8px 2px;
+  }
+  .corner-flourish{
+    position:absolute;
+    width:26px; height:26px;
+    border-top:2px solid rgba(201,164,74,0.7);
+    border-left:2px solid rgba(201,164,74,0.7);
+  }
+  .corner-flourish.tl{ top:22px; left:22px; }
+  .corner-flourish.tr{ top:22px; right:22px; transform:rotate(90deg); }
+  .corner-flourish.br{ bottom:22px; right:22px; transform:rotate(180deg); }
+  .corner-flourish.bl{ bottom:22px; left:22px; transform:rotate(270deg); }
+  .cover-title{
+    font-family:'Noto Sans Tamil', serif;
+    font-size:clamp(30px, 6vw, 42px);
+    letter-spacing:.03em;
+    margin:0 0 12px 0;
+    background:linear-gradient(180deg, #f3e2ab 0%, #c9a44a 55%, #f3e2ab 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:#e9d9ad;
+    text-shadow:0 1px 0 rgba(0,0,0,0.3);
+  }
+  .cover-sub{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:15px;
+    color:#c9b184;
+    letter-spacing:.14em;
+  }
+  .cover-name{
+    margin-top:34px;
+    font-family:'Caveat', cursive;
+    font-size:clamp(30px, 6vw, 40px);
+    color:#e3c98f;
+  }
+  .cover-rule{
+    width:70px; height:1px;
+    background:rgba(199,166,99,0.5);
+    margin:20px auto;
+  }
+  .wax-seal{
+    position:absolute; bottom:30px; right:30px;
+    width:50px; height:50px;
+    border-radius:50%;
+    background:radial-gradient(circle at 32% 30%, #a24343, var(--seal) 70%);
+    box-shadow:0 3px 8px rgba(0,0,0,0.5), inset 0 0 6px rgba(0,0,0,0.4);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Noto Sans Tamil', serif;
+    font-size:18px;
+    color:#e9d3b0;
+  }
+  .cover-tap-hint{
+    position:absolute; bottom:26px; left:30px;
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:12px;
+    color:#8d7c58;
+    letter-spacing:.1em;
+  }
+
+  /* BACK COVER */
+  .backcover-leaf .leaf-front{
+    background:radial-gradient(ellipse at 50% 50%, var(--cover-2) 0%, var(--cover) 100%);
+    align-items:center; justify-content:center; text-align:center;
+    color:#c9b184;
+    padding:0;
+  }
+  .final-word{
+    font-family:'Caveat', cursive;
+    font-size:26px;
+    color:#e3c98f;
+    letter-spacing:.03em;
+  }
+
+  .controls{
+    position:absolute;
+    bottom:-58px; left:50%; transform:translateX(-50%);
+    display:flex; gap:22px; align-items:center;
+    z-index:60;
+  }
+  .nav-btn{
+    border:1px solid rgba(199,166,99,0.4);
+    color:#cbb583;
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:14px;
+    letter-spacing:.08em;
+    padding:8px 18px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:all .25s ease;
+    background:rgba(255,255,255,0.02);
+  }
+  .nav-btn:hover:not(:disabled){
+    background:rgba(199,166,99,0.12);
+    color:#efe2c3;
+    border-color:rgba(199,166,99,0.7);
+  }
+  .nav-btn:disabled{ opacity:.25; cursor:default; }
+  .page-count{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    font-size:12.5px;
+    color:#8d7c58;
+    letter-spacing:.1em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .leaf{ transition:none; }
+    .mote{ animation:none; display:none; }
+  }
+
+  @media (max-width:520px){
+    .leaf-front{ padding:24px 18px 18px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="dust" id="dust"></div>
+  <div class="lamp-glow"></div>
+
+  <div class="book-wrap">
+    <div class="shadow-pool"></div>
+
+    <div class="book" id="book">
+      <div class="spine"></div>
+      <div class="board"></div>
+      <div class="page-edges"></div>
+      <div class="ribbon-mark"></div>
+      <div id="leafContainer" style="position:absolute; top:0; left:0; right:0; bottom:0;"></div>
+    </div>
+
+    <div class="controls">
+      <button class="nav-btn" id="prevBtn">◂ முந்தைய</button>
+      <span class="page-count" id="pageCount">அட்டை</span>
+      <button class="nav-btn" id="nextBtn">அடுத்து ▸</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const dustEl = document.getElementById('dust');
+  for(let i=0;i<28;i++){
+    const m = document.createElement('div');
+    m.className='mote';
+    m.style.left = Math.random()*100+'%';
+    m.style.bottom = '-10px';
+    m.style.animationDuration = (10+Math.random()*14)+'s';
+    m.style.animationDelay = (Math.random()*14)+'s';
+    dustEl.appendChild(m);
+  }
+
+  const pages = [
+    { type:'cover' },
+      { label:'1', icon:'🌸', html:`<p class="greet">Hi Dharshini 🌸,</p><div class="tamil"><div>✦உன்னுடைய இந்த பிறந்தநாள் மகிழ்ச்சியும், அமைதியும், அழகான நினைவுகளும் நிறைந்ததாக இருக்கட்டும்.<br><br>✦நீ  நினைக்கும் நல்ல விஷயங்கள் அனைத்தும் ஒவ்வொன்றாக நிறைவேறட்டும். ✨<br><br>
+<p>✦ நீ நினைக்கும் நல்ல விஷயங்கள் அனைத்தும் நிறைவேறட்டும்.<br><br></p>Happy Birthday, Dharshini! 🎉</div></div>` },
+    { label:'1',
+     html:`<p class="greet">Hi Dharshini,</p><div class="tamil"><div>✦ நீங்கள் எப்படி இருக்கிறீர்கள்?😊 நலமாக இருக்கிறீர்களா? மன்னிக்கவும்... கடந்த ஒன்றரை வருடமாக உங்களிடம் மீண்டும் ஒருமுறை பேச வேண்டும் என்ற எண்ணம் எனக்குள் இருந்துகொண்டே இருந்தது.<br><br>✦ ஆனால், அது என்னால் முடியவில்லை. அதற்காக என்னை மன்னித்துவிடுங்கள்🙏.<br><br>✦ உங்களுக்கு எந்த விதத்திலும் தொந்தரவு அல்லது சங்கடம் ஏற்படுத்தியிருந்தால், அதற்காக மனமார மன்னிப்பு கேட்டுக்கொள்கிறேன்.🙏🏻</div></div>` },
+    { label:'2', html:`<div class="tamil"><div>
+  
+ ✦உங்களுடன் ஒரு நல்ல நண்பராக மட்டுமே பேச வேண்டும் என்பதுதான் என்னுடைய விருப்பம்🤝🏻🌿.சமீபத்தில் நம்முடைய பழைய உரையாடல்கள் திடீரென்று நினைவுக்கு வந்தது 🌸.<br><br>
+      ✦ நாம் பேசிய சிறுசிறு விஷயங்கள், பகிர்ந்து கொண்ட எண்ணங்கள், சிரித்த தருணங்கள் எல்லாமே இன்னும் மனதில் அழகான நினைவுகளாக இருக்கின்றன.✨<br><br>✦ அந்த நினைவுகள் மீண்டும் ஒருமுறை நம்மை
+  நண்பர்களாக பேச வைக்குமோ என்று நினைத்தேன். 🤝🏻</div></div>` },
+    
+    { label:'4', html:`<div class="tamil"><div>✦ஒரு வருடத்திற்கும் மேலாக பேசாமல் இருந்தாலும், உன்னுடைய நலத்தைப் பற்றி நினைக்காமல் இருந்ததே இல்லை. <br><br>✦நீ எப்படி இருக்கிறாய், உன்னுடைய படிப்பு எப்படி போகிறது என்று பலமுறை தெரிந்துகொள்ள வேண்டும் என்று தோன்றியது.<br><br>✦ ஆனால் எந்த விதத்திலும் உனக்கு சங்கடம் ஏற்படுத்த விரும்பாததால், பேசத் தயக்கமாக இருந்தது🌿.<br><br>✦கடந்த சில மாதங்களாக உன்னிடம் பேச வேண்டும் என்று பலமுறை நினைத்தேன்.</div></div>` },
+    { label:'5', html:`<div class="tamil"><div>✦ ஆனால் என்னுள் இருந்த தயக்கமும் பயமும் காரணமாக அது முடியவில்லை.🙏🏻<br><br>✦கடந்த வருடம் கோவிலில் உன்னிடம் மன்னிப்பு கேட்க வந்தபோதும், பேச முடியாமல் போய்விட்டது.😔<br><br>✦அந்த சூழ்நிலைக்கு நான் என்னையே காரணமாக நினைக்கிறேன். அதற்காக மனதார மன்னிப்பு கேட்டுக்கொள்கிறேன்.<br><br>✦அன்று நான் கோபமாக நடந்துகொண்டதற்கான உண்மையான காரணம், உன்னை எனக்கு மிகவும் பிடிக்கும் என்பதுதான்</div></div>` },
+   
+    { label:'7', html:`<div class="tamil"><div>✦ நீ திடீரென்று என்னை விட்டு விலகிவிடுவாயோ என்ற ஒரு பயம் எனக்குள் இருந்தது.அதனால்தான் அந்த நேரத்தில் என்னால் என்னுடைய உணர்வுகளை சரியாக வெளிப்படுத்த முடியவில்லை. 😔.<br><br>✦அதற்குப் பிறகு உன்னிடம் பேச வேண்டும் என்று பலமுறை முயற்சி செய்தேன்..ஆனால் உன்னிடம் நேராக பேசுவதற்கு எனக்கு மிகவும் பயமாகவும் தயக்கமாகவும் இருந்தது.<br><br>✦உன்னைப் பற்றி Sasmitha-விடம் கேட்டபோது, அவர்களுக்கும் உன்னைப் பற்றிய எந்தத் தகவலும் தெரியவில்லை என்று சொன்னார்கள்..</div></div>` },
+    
+    { label:'9', html:`<div class="tamil"><div>✦ உன்னுடைய தொடர்பு எண்ணும் என்னிடம் இல்லை. கடந்த வருடமும் பலமுறை உன்னைப் பற்றி தெரிந்துகொள்ள முயற்சி செய்தேன். 😞<br><br>✦Sasmitha-விடமும் மீண்டும் கேட்டேன்; அவர்களுக்கும் தெரியவில்லை என்று சொன்னார்கள்.<br><br>✦அதற்குப் பிறகு பலரிடம் கேட்டும், உன்னுடைய college பற்றியும் தெரிந்துகொள்ள முயற்சி செய்தும், <br><br>✦எப்படியாவது உன்னைத் தொடர்புகொள்ள முடியுமா என்று முயற்சி செய்தேன்.<br><br></div></div>` },
+    { label:'10', html:`<div class="tamil"><div>✦ஆனால் எவ்வளவு முயற்சி செய்தாலும், எந்தத் தொடர்பையும் கண்டுபிடிக்க என்னால் முடியவில்லை✦இதை எல்லாம் உனக்கு எந்த விதமான சங்கடத்தையும் ஏற்படுத்துவதற்காக சொல்லவில்லை✦உங்களுக்கு என்னுடன் பேச விருப்பம் இருந்தால்,
+        என்னுடைய தொடர்பு எண் கீழே உள்ளது.
+        
+        <span class="contact-num">9629703380</span>
+
+        
+        ✦
+        உங்களுக்கு வசதியாகவும், விருப்பமாகவும் இருக்கும்
+        நேரத்தில் என்னைத் தொடர்புகொள்ளலாம்.</div></div>` },
+ 
+ {
+  label: '12',
+  html: `
+    <div class="tamil">
+      <div>
+        ✦இந்தக் கடிதத்தை உங்களிடம் கொடுப்பதற்கே எனக்கு
+        மிகவும் தயக்கமாகவும் பயமாகவும் இருக்கிறது. 😔
+
+        ✦இருந்தாலும், என்னுடைய சூழ்நிலையையும் மனநிலையையும்
+        ஒருமுறை புரிந்துகொள்வீர்கள் என்று நம்புகிறேன். 🙏🏻
+        
+       ✦ என்னுடைய நோக்கம் உங்களுக்கு எந்தவிதத்திலும்
+        தொந்தரவு கொடுப்பது அல்ல;
+
+        
+        ஒரு நல்ல நண்பராக மீண்டும் பேச வேண்டும்
+        என்பதுதான் என்னுடைய விருப்பம். 🤝🏻🌿
+
+        <div class="sign-off">
+      plz talk to me... 
+      i really sorry to you<br>
+          -- please talk to me .... enkita pesunga dharshini...
+    </div>
+
+       
+
+        
+      </div>
+    </div>
+
+   
+
+   
+  `
+},
+  
+
+    { type:'backcover' }
+  ];
+
+  const container = document.getElementById('leafContainer');
+  const leaves = [];
+
+  pages.forEach((p, i) => {
+    const leaf = document.createElement('div');
+    leaf.className = 'leaf' + (p.type === 'cover' ? ' cover-leaf' : p.type === 'backcover' ? ' backcover-leaf' : '');
+    leaf.style.zIndex = pages.length - i;
+
+    let frontInner = '';
+    if(p.type === 'cover'){
+      frontInner = `
+        <div class="cover-frame"></div>
+        <div class="corner-flourish tl"></div>
+        <div class="corner-flourish tr"></div>
+        <div class="corner-flourish br"></div>
+        <div class="corner-flourish bl"></div>
+        <div>
+          <div class="cover-title">ஒரு சிறிய கடிதம்</div>
+          <div class="cover-sub">an unspoken letter</div>
+          <div class="cover-rule"></div>
+          <div class="cover-name">Dharshini,</div>
+        </div>
+        <div class="wax-seal">D</div>
+        <div class="cover-tap-hint">தொடவும் →</div>`;
+    } else if(p.type === 'backcover'){
+      frontInner = `<div class="final-word">Everyone has someone <br>special <br>in their life… and for me,<br> you have always <br>been someone <br>truly special. ✨ <br><br>i Really sorry ...<br>i really sorry to you..... </div>`;
+    } else {
+      frontInner = `<div class="page-label">${p.label}</div>${p.html}`;
+    }
+
+    leaf.innerHTML = `
+      <div class="leaf-front${p.type === 'cover' ? ' cover-face' : ''}">${frontInner}</div>
+      <div class="leaf-back"></div>
+    `;
+    leaf.addEventListener('click', () => handleLeafClick(i));
+    container.appendChild(leaf);
+    leaves.push(leaf);
+  });
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const pageCount = document.getElementById('pageCount');
+
+  let state = 0;
+  const total = leaves.length;
+
+  function render(){
+    leaves.forEach((leaf, i) => leaf.classList.toggle('flipped', i < state));
+    prevBtn.disabled = state === 0;
+    nextBtn.disabled = state === total;
+    pageCount.textContent = state === 0 ? 'அட்டை' : (state === total ? 'முடிவு' : `${state} / ${total - 1}`);
+  }
+
+  function next(){ if(state < total){ state++; render(); } }
+  function prev(){ if(state > 0){ state--; render(); } }
+
+  function handleLeafClick(i){
+    if(i === state){ next(); }
+    else if(i === state - 1){ prev(); }
+  }
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+
+  render();
+</script>
+</body>
+</html>
